@@ -7,7 +7,6 @@ import pvlib
 import pandas
 from datetime import datetime, timedelta, timezone
 import pytz
-import os
 
 def db_get_connection():
 
@@ -26,20 +25,16 @@ def index():
         eircode = flask.request.form.get('eircode')   
         lat_lon = get_lat_lon_from_eircode(eircode)
         lat_lon_string = ",".join(map(str, lat_lon))
-        panel_area = flask.request.form.get('panel_area')
-        panel_efficiency = int(flask.request.form.get('panel_efficiency')) / 100
-        panel_tilt = flask.request.form.get('panel_tilt')
-        panel_azimuth = flask.request.form.get('panel_azimuth')
 
         # Save all these inputs to the solcalc.db database
         con = db_get_connection()
         cur = con.cursor()
-        cur.execute("INSERT INTO simulation (eircode , latitude_longitude, panel_area, panel_efficiency, panel_tilt, panel_azimuth) VALUES (?,?,?,?,?,?)", (eircode, lat_lon_string, panel_area, panel_efficiency, panel_tilt, panel_azimuth))
+        cur.execute("INSERT INTO simulation (eircode , latitude_longitude) VALUES (?,?)", (eircode, lat_lon_string))
         last_row_id = cur.lastrowid
         con.commit()
         con.close()
 
-        hash_id = make_random_name(last_row_id)
+        hash_id = encode_id(last_row_id)
         return flask.redirect(flask.url_for("show_data", hash_id=hash_id))
 
     elif flask.request.method == "GET":
@@ -47,17 +42,30 @@ def index():
     else:
         #boom!
         raise
+
+
+@app.route("/<hash_id>", methods=["GET", "POST"])
+def get_detailed_user_data(hash_id):
+    if flask.request.method == "POST":
+        decoded_id = decode_id(hash_id)
+        panel_area = flask.request.form.get('panel_area')
+        panel_efficiency = int(flask.request.form.get('panel_efficiency')) / 100
+        panel_tilt = flask.request.form.get('panel_tilt')
+        panel_azimuth = flask.request.form.get('panel_azimuth')
+
+
+        # Update data base with new inputs
+        con = db_get_connection()
+        cur = con.cursor()
+        cur.execute("UPDATE simulation SET panel_area = ?, panel_efficiency = ?, panel_tilt = ?, panel_azimuth = ? WHERE id = ?", (panel_area, panel_efficiency, panel_tilt, panel_azimuth, decoded_id))   
+        con.commit()
+        con.close()
+    elif flask.request.method =="GET":
+        return flask.render_template("furtherdetails.html", hash_id=hash_id)
     
-@app.route("/<hash_id>")
-def show_data(hash_id):
-    # Decode users hash_id
-    # Should do this in a function ideally
-    alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'
-    hash_decoder = hashids.Hashids(salt='this is my salt', min_length=8, alphabet=alphabet)
-    decoded_id = hash_decoder.decode(hash_id)[0]
-    # .decoder() returns a tuple
-
-
+@app.route("/<hash_id>/solardata")
+def get_json_data(hash_id):
+    decoded_id = decode_id(hash_id)
     times_from_now = rounds_and_calculates_a_year_of_dates()
     # Get data from solarcalc.db database and plug the data into calc_power_output() 
     con = db_get_connection()
@@ -71,16 +79,45 @@ def show_data(hash_id):
     lat_lon = tuple(map(float, decoded_id_row_from_db[2].split(",")))
 
     dc_power_output = calc_power_output(lat_lon[0], lat_lon[1], decoded_id_row_from_db[3], decoded_id_row_from_db[4], decoded_id_row_from_db[5], decoded_id_row_from_db[6], times_from_now)
-    os.makedirs('solarcalc/static', exist_ok=True)
-    dc_power_output.to_json("solarcalc/static/data.json", orient="records")
-    return flask.render_template("simulator.html", power_output=dc_power_output)
+    dc_power_output = dc_power_output.reset_index().rename(columns={"time(UTC)": "x", 0: "y"})
+    json_power_output = dc_power_output.to_json(orient="records", date_format="iso")
+    return json_power_output
 
-def make_random_name(n: int) -> str:
+    
+@app.route("/<hash_id>/simulate")
+def simulate(hash_id):
+    decoded_id = decode_id(hash_id)
+    times_from_now = rounds_and_calculates_a_year_of_dates()
+    # Get data from solarcalc.db database and plug the data into calc_power_output() 
+    con = db_get_connection()
+    cur = con.cursor()
+    # Not worth individually assiging each parameter grabbing them all as a tuple
+    cur.execute("SELECT * FROM simulation WHERE id = ?", (decoded_id,))
+    decoded_id_row_from_db = cur.fetchone()
+    con.close()
+
+    # Converting the latitude_longitude to a tuple
+    lat_lon = tuple(map(float, decoded_id_row_from_db[2].split(",")))
+
+    dc_power_output = calc_power_output(lat_lon[0], lat_lon[1], decoded_id_row_from_db[3], decoded_id_row_from_db[4], decoded_id_row_from_db[5], decoded_id_row_from_db[6], times_from_now)
+    dc_power_output = dc_power_output.reset_index().rename(columns={"time(UTC)": "x", 0: "y"})
+    dc_power_output = dc_power_output.to_json("solarcalc/static/data.json", orient="records", date_format="iso")
+
+    return flask.render_template("simulator.html", power_output=dc_power_output, hash_id=hash_id)
+
+
+ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz'
+
+def encode_id(n: int) -> str:
     #salt, hash it, base36 it
-    alphabet = '0123456789abcdefghijklmnopqrstuvwxyz'
-    hash_encoder = hashids.Hashids(salt='this is my salt', min_length=8, alphabet=alphabet)
+    hash_encoder = hashids.Hashids(salt='this is my salt', min_length=8, alphabet=ALPHABET)
     hashid = hash_encoder.encode(n)
     return hashid
+
+def decode_id(hash_id: str) -> int:
+    hash_encoder = hashids.Hashids(salt='this is my salt', min_length=8, alphabet=ALPHABET)
+    n = hash_encoder.decode(hash_id)[0]
+    return n
 
 
 def get_lat_lon_from_eircode(eircode):

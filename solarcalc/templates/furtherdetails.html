@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+{% block header %}Details{% endblock %}
+{% block content %} 
+<form action="{{ url_for("get_detailed_user_data" , hash_id=hash_id) }}" method="POST">
+<div>
+    <label for="panel_area">Enter the total solar panel area:</label>
+    <input type="number" min="0" name="panel_area" required>
+</div>
+<div>
+    <label for="panel_efficiency">Enter the panel efficiency as a percent:</label>
+    <input type="number" min="0" max="100" name="panel_efficiency" required>
+</div>
+<div>
+    <label for="panel_azimuth">Enter the panel azimuth in degrees as an integer:</label>
+    <input type="number" min="0" max="360" name="panel_azimuth" required>
+</div>
+<div>
+    <label for="panel_tilt">Enter the panel tilt from 0 being horizontal to 90 degrees being vertical:</label>
+    <input type="number" min="0" max="90" name="panel_tilt" required>
+</div>
+<div>
+    <input type="submit" value="simulate">
+</div>
+</form>
+{% endblock %}
