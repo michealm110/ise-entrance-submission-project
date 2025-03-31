@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block header %}Simulator{% endblock %}
+{% block content %} 
+    <h3>Power Output in Watts: {{ power_output }}</h3>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<canvas id="solarChart"></canvas>
+
+<script>
+fetch("{{ url_for('static', filename='data.json') }}")
+    .then(response => response.json())
+    .then(data => {
+        const labels = data.map(item => item.time);
+        const powerOutput = data.map(item => item.power_output);
+
+        const ctx = document.getElementById('solarChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Solar Power Output (W)',
+                    data: powerOutput,
+                    borderColor: 'orange',
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: { title: { display: true, text: 'Time' } },
+                    y: { title: { display: true, text: 'Power Output (W)' } }
+                }
+            }
+        });
+    })
+    .catch(error => console.error('Error loading data:', error));
+</script>
+       
+{% endblock %}
