@@ -35,12 +35,11 @@ def index():
         con.close()
 
         hash_id = encode_id(last_row_id)
-        return flask.redirect(flask.url_for("show_data", hash_id=hash_id))
+        return flask.redirect(flask.url_for("get_detailed_user_data", hash_id=hash_id))
 
     elif flask.request.method == "GET":
         return flask.render_template('index.html')
     else:
-        #boom!
         raise
 
 
@@ -60,8 +59,23 @@ def get_detailed_user_data(hash_id):
         cur.execute("UPDATE simulation SET panel_area = ?, panel_efficiency = ?, panel_tilt = ?, panel_azimuth = ? WHERE id = ?", (panel_area, panel_efficiency, panel_tilt, panel_azimuth, decoded_id))   
         con.commit()
         con.close()
+
+        return flask.redirect(flask.url_for("simulate", hash_id=hash_id))
     elif flask.request.method =="GET":
-        return flask.render_template("furtherdetails.html", hash_id=hash_id)
+        con = db_get_connection()
+        cur = con.cursor()
+        cur.execute("SELECT * FROM simulation WHERE id = ?", (hash_id,))
+        row = cur.fetchone()
+        # row is a tuple or "None"
+        con.close()
+
+        if row is not None:
+            return flask.render_template("furtherdetails.html", hash_id=hash_id, panel_area=row[3], panel_efficiency=row[4], panel_tilt=row[5], panel_azimuth=row[6])
+        
+        return flask.render_template("furtherdetails.html", hash_id=hash_id, panel_area=15, panel_efficiency=18, panel_azimuth=180, panel_tilt=18)
+    else:
+        raise
+
     
 @app.route("/<hash_id>/solardata")
 def get_json_data(hash_id):
@@ -79,8 +93,10 @@ def get_json_data(hash_id):
     lat_lon = tuple(map(float, decoded_id_row_from_db[2].split(",")))
 
     dc_power_output = calc_power_output(lat_lon[0], lat_lon[1], decoded_id_row_from_db[3], decoded_id_row_from_db[4], decoded_id_row_from_db[5], decoded_id_row_from_db[6], times_from_now)
-    dc_power_output = dc_power_output.reset_index().rename(columns={"time(UTC)": "x", 0: "y"})
-    json_power_output = dc_power_output.to_json(orient="records", date_format="iso")
+    index_range = pandas.date_range(start="2024-01-01 00:00:00+00:00",end="2024-01-02 00:00:00+00:00", freq="1h")
+    dc_power_output_one_day  = dc_power_output[dc_power_output.index.isin(index_range)]
+    dc_power_output_one_day = dc_power_output_one_day.reset_index().rename(columns={"time(UTC)": "x", 0: "y"})
+    json_power_output = dc_power_output_one_day.to_json(orient="records", date_format="iso")
     return json_power_output
 
     
@@ -99,11 +115,12 @@ def simulate(hash_id):
     # Converting the latitude_longitude to a tuple
     lat_lon = tuple(map(float, decoded_id_row_from_db[2].split(",")))
 
+    #Is all this really necessary
     dc_power_output = calc_power_output(lat_lon[0], lat_lon[1], decoded_id_row_from_db[3], decoded_id_row_from_db[4], decoded_id_row_from_db[5], decoded_id_row_from_db[6], times_from_now)
     dc_power_output = dc_power_output.reset_index().rename(columns={"time(UTC)": "x", 0: "y"})
-    dc_power_output = dc_power_output.to_json("solarcalc/static/data.json", orient="records", date_format="iso")
+    dc_power_output = dc_power_output.to_json(orient="records", date_format="iso")
 
-    return flask.render_template("simulator.html", power_output=dc_power_output, hash_id=hash_id)
+    return flask.render_template("simulator.html", hash_id=hash_id)
 
 
 ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyz'

@@ -1,8 +1,6 @@
 {% extends "layout.html" %}
 {% block header %}Simulator{% endblock %}
 {% block content %} 
-    <h3>Power Output in Watts: {{ power_output }}</h3>
-
     <canvas id="solarChart"></canvas>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
