@@ -19,7 +19,19 @@
     <input type="number" min="0" max="90" name="panel_tilt" value={{ panel_tilt }} required>
 </div>
 <div>
-    <input type="submit" value="simulate">
+    <input type="submit" value="save">
 </div>
 </form>
+<hr>
+<form action="{{ url_for("process_esb", hash_id=hash_id) }}", method="POST" enctype=multipart/form-data>
+<div>
+    <label for="esb_file">Upload your ESB file here: </label>
+    <input type="file" name="esb_file" >
+</div>
+<div>
+    <input type="submit" value="save">
+</div>
+</form>
+<hr>
+<a href="{{ url_for("simulate", hash_id=hash_id) }}">Simulate</a>
 {% endblock %}
