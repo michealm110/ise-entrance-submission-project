@@ -12,3 +12,4 @@ wheels/
 # Application data files
 solarcalc.db
 solarcalc/static/data.json
+solarcalc/uploads

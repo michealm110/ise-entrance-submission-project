@@ -3,12 +3,12 @@
 {% block content %} 
 <form action="{{ url_for("get_detailed_user_data" , hash_id=hash_id) }}" method="POST">
 <div>
-    <label for="panel_area">Enter the total solar panel area:</label>
-    <input type="number" min="0" name="panel_area" value={{ panel_area }} required>
+    <label for="rated_power_per_panel">Enter the power rating of your solar panel:</label>
+    <input type="number" min="0" name="rated_power_per_panel" value={{ rated_power_per_panel }} required>
 </div>
 <div>
-    <label for="panel_efficiency">Enter the panel efficiency as a percent:</label>
-    <input type="number" min="0" max="100" name="panel_efficiency" value={{ panel_efficiency }} required>
+    <label for="number_of_panels">Enter the number of panels you own:</label>
+    <input type="number" name="number_of_panels" value={{ number_of_panels }} required>
 </div>
 <div>
     <label for="panel_azimuth">Enter the panel azimuth in degrees as an integer:</label>
