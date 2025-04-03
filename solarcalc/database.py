@@ -16,7 +16,7 @@ def decode_id(hash_id: str) -> int:
 
 def db_get_connection():
     con = sqlite3.connect("solarcalc.db")
-    con.execute("CREATE TABLE IF NOT EXISTS simulation (id INTEGER PRIMARY KEY AUTOINCREMENT, eircode TEXT NOT NULL , latitude_longitude TEXT, rated_power_per_panel REAL, number_of_panels INTEGER, panel_tilt REAL, panel_azimuth REAL);")
+    con.execute("CREATE TABLE IF NOT EXISTS simulation ( id INTEGER PRIMARY KEY AUTOINCREMENT, eircode TEXT NOT NULL , latitude_longitude TEXT, rated_power_per_panel REAL, number_of_panels INTEGER, panel_tilt REAL, panel_azimuth REAL, installation_costs REAL, cost_per_panel REAL, maintenance_cost_per_year REAL, electricity_rate REAL,  electricity_degradation REAL);")
     con.commit()
     return con
 

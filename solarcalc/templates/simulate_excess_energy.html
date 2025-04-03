@@ -9,28 +9,27 @@
 <form  method="GET">
     <label for="start">Start Date:</label>
     <input type="date" id="start" name="start" min="2024-01-01" max="2024-12-31" value="2024-07-23" required>
-
 </form>
 <hr>
 <div>
-    <canvas id="comparisonChart"></canvas>
+    <canvas id="importChart"></canvas>
     <script>
-        function updateChartData(data1){
-            myChart.data.labels = data1.map(d => d.datetime);
-            myChart.data.datasets[0].data = data1.map(d => d.power_import);
-            myChart.update();
+        function updateComparisonChart(data1) {
+            comparisonChart.data.labels = data1.map(d => d.datetime);
+            comparisonChart.data.datasets[0].data = data1.map(d => d.power_import);
+            comparisonChart.update();
         }
 
         const start_date = document.getElementById("start");
-        const ctx = document.getElementById("comparisonChart").getContext("2d");
+        const comparisonCtx = document.getElementById("importChart").getContext("2d");
 
-        let myChart = new Chart(ctx, {
+        let comparisonChart = new Chart(comparisonCtx, {
             type: "line",
             data: {
-                labels: [],  // Time values
+                labels: [],
                 datasets: [
                 {
-                    label: "Power Output 2 (W)",
+                    label: "Energy to be Imported (W)",
                     data: [],
                     borderColor: "red",
                     fill: false
@@ -40,24 +39,103 @@
             options: {
                 responsive: true,
                 scales: {
-                    x: {title: { display: true, text: 'Time'
-                } },
-                y: { beginAtZero: true }
+                    x: {title: { display: true, text: 'Time' } },
+                    y: { beginAtZero: true }
                 }
             }
-            });
-            
-            start_date.addEventListener("change", (event) => {
-                fetch("{{ url_for("get_excess_json_data", hash_id=hash_id) }}" + "?start=" + start_date.value)
-                .then(response => response.json())
-                .then(updateChartData);
-            });
-
-       
-        fetch("{{ url_for("get_excess_json_data", hash_id=hash_id) }}" + "?start=" + start_date.value)
-        .then(response => response.json())
-        .then(updateChartData);
+        });
     </script>
 </div>
+<div>
+    <canvas id="excessChart"></canvas>
+    <script>
+        function updateExcessChart(data1) {
+            excessChart.data.labels = data1.map(d => d.datetime);
+            excessChart.data.datasets[0].data = data1.map(d => d.power_excess);
+            excessChart.update();
+        }
 
+        const excessCtx = document.getElementById("excessChart").getContext("2d");
+
+        let excessChart = new Chart(excessCtx, {
+            type: "line",
+            data: {
+                labels: [],
+                datasets: [
+                {
+                    label: "Energy to be Exported (W)",
+                    data: [],
+                    borderColor: "red",
+                    fill: false
+                }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {title: { display: true, text: 'Time' } },
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+    </script>
+</div>
+<script>
+    function fetchAndUpdateCharts() {
+        fetch("{{ url_for("get_energy_needed_json_data", hash_id=hash_id) }}" + "?start=" + start_date.value)
+            .then(response => response.json())
+            .then(updateComparisonChart);
+
+        fetch("{{ url_for("get_excess_solar_json_data", hash_id=hash_id) }}" + "?start=" + start_date.value)
+            .then(response => response.json())
+            .then(updateExcessChart);
+    }
+
+    start_date.addEventListener("change", fetchAndUpdateCharts);
+
+    fetchAndUpdateCharts();
+</script>
+
+<div>
+<canvas id="comparisonBarChart"></canvas>
+<script>
+    fetch("{{ url_for("get_import_and_export_json_data", hash_id=hash_id) }}")
+        .then(response => response.json())
+        .then(data => updateChart(data));
+  
+    function updateChart(data) {
+        const labels = data.map(item => item.month);
+        const exportData = data.map(item => item.export); 
+        const importData = data.map(item => item.import); 
+    
+        const ctx = document.getElementById("comparisonBarChart").getContext("2d");
+    
+        new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [
+            {
+                label: "Energy Export (kWh)",
+                data: exportData,
+                backgroundColor: "rgba(54, 162, 235, 0.6)"
+            },
+            {
+                label: "Energy Import (kWh)",
+                data: importData,
+                backgroundColor: "rgba(255, 99, 132, 0.6)"
+            }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+            x: { stacked: false },
+            y: { stacked: false }
+            }
+        }
+    });
+    }
+</script>
+</div>
 {% endblock %}

@@ -50,36 +50,64 @@ def index():
 
 @app.route("/<hash_id>", methods=["GET", "POST"])
 def get_detailed_user_data(hash_id):
+    decoded_id = decode_id(hash_id)
     if flask.request.method == "POST":
-        decoded_id = decode_id(hash_id)
         rated_power_per_panel = flask.request.form.get("rated_power_per_panel")
         number_of_panels = flask.request.form.get("number_of_panels")
         panel_tilt = flask.request.form.get("panel_tilt")
         panel_azimuth = flask.request.form.get("panel_azimuth")
+        installation_costs = flask.request.form.get("installation_costs")
+        cost_per_panel = flask.request.form.get("cost_per_panel")
+        maintenance_cost_per_year = flask.request.form.get("maintenance_cost_per_year")
+        electricity_rate = flask.request.form.get("electricity_rate")
+        efficiency_degradation = flask.request.form.get("efficiency_degradation")
 
 
         # Update data base with new inputs
         con = db_get_connection()
         cur = con.cursor()
-        cur.execute("UPDATE simulation SET rated_power_per_panel = ?, number_of_panels = ?, panel_tilt = ?, panel_azimuth = ? WHERE id = ?", (rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth, decoded_id))   
+        cur.execute("UPDATE simulation SET rated_power_per_panel = ?, number_of_panels = ?, panel_tilt = ?, panel_azimuth = ?, installation_costs = ?, cost_per_panel = ?, maintenance_cost_per_year = ?, electricity_rate = ?, efficiency_degradation = ? panel WHERE id = ?", (rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth, installation_costs, cost_per_panel, maintenance_cost_per_year, electricity_rate, efficiency_degradation, decoded_id))   
         con.commit()
         con.close()
 
-        return flask.render_template("furtherdetails.html", hash_id=hash_id)
+        return flask.render_template("furtherdetails.html", hash_id=hash_id,  rated_power_per_panel=rated_power_per_panel, number_of_panels=number_of_panels, panel_azimuth=panel_azimuth, panel_tilt=panel_tilt)
     elif flask.request.method == "GET":
         con = db_get_connection()
         cur = con.cursor()
-        cur.execute("SELECT * FROM simulation WHERE id = ?", (hash_id,))
+        cur.execute("SELECT rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth, installation_costs, cost_per_panel, maintenance_cost_per_year, electricity_rate, efficiency_degradation FROM simulation WHERE id = ?", (decoded_id,))
         row = cur.fetchone()
         # row is a tuple or "None"
         con.close()
+        rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth, installation_costs, cost_per_panel, maintenance_cost_per_year, electricity_rate, efficiency_degradation = row
 
         if row is not None:
-            return flask.render_template("furtherdetails.html", hash_id=hash_id, rated_power_per_panela=row[3], number_of_panelsy=row[4], panel_tilt=row[5], panel_azimuth=row[6])
-        
-        return flask.render_template("furtherdetails.html", hash_id=hash_id, rated_power_per_panel=445, number_of_panels=1, panel_azimuth=180, panel_tilt=18)
+            return flask.render_template("furtherdetails.html", hash_id=hash_id, rated_power_per_panel=rated_power_per_panel, number_of_panels=number_of_panels, panel_tilt=panel_tilt, panel_azimuth=panel_azimuth, installation_costs=installation_costs, cost_per_panel=cost_per_panel, maintenance_cost_per_year=maintenance_cost_per_year, electricity_rate=electricity_rate, efficiency_degradation=efficiency_degradation)
+        else:
+            # initial default values:
+            return flask.render_template("furtherdetails.html", hash_id=hash_id, rated_power_per_panel=445, number_of_panels=4, panel_azimuth=180, panel_tilt=40, installation_costs=8500, cost_per_panel=1750, maintenance_cost_per_year=200, electricity_rate=0.3762, efficiency_degradation=0.5)
     else:
         raise
+
+@app.route("/<hash_id>/financial_projections")
+def get_financial_projections(hash_id):
+    decoded_id = decode_id(hash_id)
+    con = db_get_connection()
+    cur = con.cursor()
+    cur.execute("SELECT rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth, installation_costs, cost_per_panel, maintenance_cost_per_year, electricity_rate, efficiency_degradation FROM simulation WHERE id = ?", (decoded_id,))
+    row = cur.fetchone()
+    con.close()
+    rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth, installation_costs, cost_per_panel, maintenance_cost_per_year, electricity_rate, efficiency_degradation = row
+    total_cost = installation_costs + (cost_per_panel * number_of_panels)
+
+    # This calculates the savings from the solar panels in killowatt hours in 2024
+    solar_data = get_solar_data(hash_id, pandas.Timestamp("2024-01-01 00:00:00").tz_localize("UTC"), pandas.Timestamp("2024-12-31 23:59:59").tz_localize("UTC"))
+    total_solar_power = solar_data["power"].sum()
+    excess_solar_power = json.loads(get_excess_solar_json_data(hash_id))
+    excess_solar_power = pandas.DataFrame(excess_solar_power)
+    excess_solar_power = excess_solar_power["power_excess"].sum()
+    used_solar_power = (total_solar_power - excess_solar_power) / 1000 * 0.5
+    savings = used_solar_power * electricity_rate
+    # end of savings calculation
 
 @app.route("/<hash_id>/process", methods=["GET", "POST"])
 def process_esb(hash_id):
@@ -122,8 +150,8 @@ def get_combined_json_data_for_simulator(hash_id):
 
     return combined_data.to_json(orient="records", date_format="iso")
 
-@app.route("/<hash_id>/excess_energy")   
-def  get_excess_json_data(hash_id):
+@app.route("/<hash_id>/energy_needed_to_import")
+def get_energy_needed_json_data(hash_id):
     start = flask.request.args.get("start", "2024-")
     start = pandas.to_datetime(start).tz_localize("UTC")
     end = start + pandas.Timedelta(hours=23, minutes=30)
@@ -134,9 +162,56 @@ def  get_excess_json_data(hash_id):
         combined_data["power_import"] = combined_data["power_esb"] - combined_data["power_solar"]
         combined_data.loc[combined_data["power_import"] < 0, "power_import"] = 0
     else:
-        combined_data["power_import"] = 0
+        raise
     combined_data = combined_data.drop(columns=["power_solar", "power_esb"])
     return combined_data.to_json(orient="records", date_format="iso")
+
+@app.route("/<hash_id>/excess_solar_energy") 
+def get_excess_solar_json_data(hash_id):
+    start = flask.request.args.get("start", "2024-")
+    start = pandas.to_datetime(start).tz_localize("UTC")
+    end = start + pandas.Timedelta(hours=23, minutes=30)
+
+    combined_data = get_combined_data(hash_id, start, end)
+
+    if "power_solar" in combined_data.columns and "power_esb" in combined_data.columns:
+        combined_data["power_excess"] = combined_data["power_solar"] - combined_data["power_esb"]
+        combined_data.loc[combined_data["power_excess"] < 0, "power_excess"] = 0
+    else:
+        raise
+    combined_data = combined_data.drop(columns=["power_solar", "power_esb"])
+    return combined_data.to_json(orient="records", date_format="iso")
+
+MONTHS = (
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+)
+
+# No way is this right!!!!
+@app.route("/<hash_id>/import_and_export_data")
+def get_import_and_export_json_data(hash_id):
+    start = pandas.Timestamp("2024-01-01 00:00:00").tz_localize("UTC")
+    end = pandas.Timestamp("2024-12-31 23:59:59").tz_localize("UTC")
+    combined_data = get_combined_data(hash_id, start, end)
+    if "power_solar" in combined_data.columns and "power_esb" in combined_data.columns:
+        combined_data["power_excess"] = combined_data["power_solar"] - combined_data["power_esb"]
+        combined_data.loc[combined_data["power_excess"] < 0, "power_excess"] = 0
+
+        combined_data["power_import"] = combined_data["power_esb"] - combined_data["power_solar"]
+        combined_data.loc[combined_data["power_import"] < 0, "power_import"] = 0
+    else:
+        raise
+
+
+    data = []
+    for i in range(1,13):
+        combined_data_by_month = combined_data[combined_data["datetime"].dt.month == i]
+        monthly_power_excess = combined_data_by_month["power_excess"].sum()
+        monthly_power_import = combined_data_by_month["power_import"].sum()
+        data.append({"month": MONTHS[i-1], "export": monthly_power_excess, "import": monthly_power_import})
+
+    return json.dumps(data)
+
 
 #############################################################################
 
