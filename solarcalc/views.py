@@ -100,8 +100,7 @@ def get_json_data(hash_id):
 
     dc_power_output = get_30min_calc_vals( latitude, longitude, rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth)
 
-    json_power_output = dc_power_output.to_json(orient="records", date_format="iso")
-    return json_power_output
+    return dc_power_output.to_json(orient="records", date_format="iso")
 
 @app.route("/<hash_id>/esbdata")
 def get_esb_json_data(hash_id):
@@ -113,9 +112,7 @@ def get_esb_json_data(hash_id):
     esb_intake["x"] = pandas.to_datetime(esb_intake["x"], dayfirst=True).dt.tz_localize('UTC')
     esb_intake = esb_intake.sort_values(by=['x'])
 
-    json_esb_intake = esb_intake.to_json(orient='records', date_format='iso')
-
-    return json_esb_intake
+    return esb_intake.to_json(orient='records', date_format='iso')
 
 @app.route("/<hash_id>/full_combined_data")
 def get_combined_json_data(hash_id):
@@ -130,9 +127,8 @@ def get_combined_json_data(hash_id):
     solar_data = solar_data[(solar_data["x"] >= start) & (solar_data["x"] <= end)]
     esb_data = esb_data[(esb_data["x"] >= start) & (esb_data["x"] <= end)]
     combined_data = pandas.merge(solar_data.rename(columns={"y": "y1"}), esb_data.rename(columns={"y": "y2"}), on="x", how="outer")
-    combined_data_json = combined_data.to_json(orient="records", date_format="iso")
 
-    return combined_data_json
+    return combined_data.to_json(orient="records", date_format="iso")
 
 @app.route("/<hash_id>/combineddata", methods=["GET"])
 def get_combined_json_data_for_simulator(hash_id):
@@ -144,11 +140,7 @@ def get_combined_json_data_for_simulator(hash_id):
     combined_data["x"] = pandas.to_datetime(combined_data["x"]) 
     combined_data = combined_data[(combined_data["x"] >= start) & (combined_data["x"] < end)]
 
-    combined_json = combined_data.to_json(orient="records", date_format="iso")
-
-    return combined_json
-
-    
+    return combined_data.to_json(orient="records", date_format="iso")
 
 @app.route("/<hash_id>/simulate")
 def simulate(hash_id):
@@ -169,10 +161,7 @@ def  get_excess_json_data(hash_id):
     else:
         combined_data["y"] = 0
     combined_data = combined_data.drop(columns=["y1", "y2"])
-    combined_json = combined_data.to_json(orient="records", date_format="iso")
-    return combined_json
-
-
+    return combined_data.to_json(orient="records", date_format="iso")
 
 @app.route("/<hash_id>/simulate_excess_energy")
 def simulate_excess_energy(hash_id):
@@ -199,8 +188,6 @@ def process_esb(hash_id):
             return flask.redirect(flask.url_for("get_detailed_user_data", hash_id=hash_id))
     # No valid file redirect
     return flask.redirect(flask.url_for("get_detailed_user_data", hash_id=hash_id))
-
-
 
 def get_lat_lon_from_eircode(eircode):
     base_url = "https://nominatim.openstreetmap.org/search"
