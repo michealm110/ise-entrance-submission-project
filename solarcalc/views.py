@@ -1,6 +1,4 @@
 import flask
-import sqlite3
-import hashids
 import requests
 import pvlib
 import pandas
@@ -11,14 +9,10 @@ from werkzeug.utils import secure_filename
 import numpy
 import json
 
+from solarcalc.database import encode_id, decode_id, db_get_connection
+
 UPLOAD_FOLDER = "/Users/michealmcmagh/Desktop/ise-entrance-submission-project/solarcalc/uploads"
 ALLOWED_EXTENSIONS = {"csv"}
-
-def db_get_connection():
-    con = sqlite3.connect("solarcalc.db")
-    con.execute("CREATE TABLE IF NOT EXISTS simulation (id INTEGER PRIMARY KEY AUTOINCREMENT, eircode TEXT NOT NULL , latitude_longitude TEXT, rated_power_per_panel REAL, number_of_panels INTEGER, panel_tilt REAL, panel_azimuth REAL);")
-    con.commit()
-    return con
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -223,19 +217,6 @@ def process_esb(hash_id):
     # No valid file redirect
     return flask.redirect(flask.url_for("get_detailed_user_data", hash_id=hash_id))
 
-
-ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
-
-def encode_id(n: int) -> str:
-    #salt, hash it, base36 it
-    hash_encoder = hashids.Hashids(salt="this is my salt", min_length=8, alphabet=ALPHABET)
-    hashid = hash_encoder.encode(n)
-    return hashid
-
-def decode_id(hash_id: str) -> int:
-    hash_encoder = hashids.Hashids(salt="this is my salt", min_length=8, alphabet=ALPHABET)
-    n = hash_encoder.decode(hash_id)[0]
-    return n
 
 
 def get_lat_lon_from_eircode(eircode):
