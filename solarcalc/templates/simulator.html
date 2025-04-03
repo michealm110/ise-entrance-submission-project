@@ -16,9 +16,9 @@
     <canvas id="comparisonChart"></canvas>
     <script>
         function updateChartData(data1){
-            myChart.data.labels = data1.map(d => d.x);
-            myChart.data.datasets[0].data = data1.map(d => d.y1);
-            myChart.data.datasets[1].data = data1.map(d => d.y2);
+            myChart.data.labels = data1.map(d => d.datetime);
+            myChart.data.datasets[0].data = data1.map(d => d.power_solar);
+            myChart.data.datasets[1].data = data1.map(d => d.power_esb);
             myChart.update();
         }
 

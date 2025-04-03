@@ -5,13 +5,13 @@ import pvlib
 # Function that calculates power output of a solar panel 
 # Makes assumptions about weather
 # date and time not constant for this project
-def calc_power_output(latitude, longitude, rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth):    
+def calc_power_output(latitude, longitude, rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth, start, end):    
     location = pvlib.location.Location(latitude, longitude)
     #clearsky_irradiance =  location.get_clearsky(times)
 
     # Typical meteorogical year using the pvgis api
-    data, _, _, _ = pvlib.iotools.get_pvgis_tmy(latitude=latitude, longitude=longitude)
-
+    data, _, _, _ = pvlib.iotools.get_pvgis_tmy(latitude=latitude, longitude=longitude, coerce_year=2024)
+    data = data[(data.index >= start) & (data.index <= end)]
     solar_position = location.get_solarposition(data.index)
 
     #solar_position = location.get_solarposition(date_time)
@@ -49,25 +49,28 @@ def calc_power_output(latitude, longitude, rated_power_per_panel, number_of_pane
 
     return dc_power * number_of_panels
 
-def get_30min_calc_vals(latitude, longitude, rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth):
-    dc_power_output = calc_power_output(latitude, longitude, rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth)
-    dc_power_output = dc_power_output.reset_index().rename(columns={"time(UTC)": "x", 0: "y"})
+def get_30min_calc_vals(latitude, longitude, rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth, start, end):
+    dc_power_output = calc_power_output(latitude, longitude, rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth, start, end)
+    dc_power_output = dc_power_output.reset_index().rename(columns={"time(UTC)": "datetime", 0: "power"})
 
-    times = pandas.date_range(start="2024-01-01 00:30:00.000", end="2024-12-31 00:00:00.000", freq="1h", tz="UTC")
+    act_start = start.replace(year=2024, minute=30)
+    act_end = end.replace(year=2024)
 
-    new_rows = pandas.DataFrame({"x": times, "y": numpy.nan})
+    times = pandas.date_range(start=act_start, end=act_end, freq="1h", tz="UTC")
+
+    new_rows = pandas.DataFrame({"datetime": times, "power": numpy.nan})
         
     dc_power_output = pandas.concat([dc_power_output, new_rows], ignore_index=True)
 
-    dc_power_output = dc_power_output.sort_values(by="x").reset_index(drop=True)
+    dc_power_output = dc_power_output.sort_values(by="datetime").reset_index(drop=True)
 
-    if numpy.isnan(dc_power_output.loc[0, "y"]):
-        dc_power_output.loc[0, "y"] = 0
+    if numpy.isnan(dc_power_output.loc[0, "power"]):
+        dc_power_output.loc[0, "power"] = 0
 
-    if numpy.isnan(dc_power_output.loc[len(dc_power_output) - 1, "y"]):
-        dc_power_output.loc[len(dc_power_output) - 1, "y"] = 0
+    if numpy.isnan(dc_power_output.loc[len(dc_power_output) - 1, "power"]):
+        dc_power_output.loc[len(dc_power_output) - 1, "power"] = 0
 
-    dc_power_output["y"] = get_avg_value(dc_power_output["y"].to_list())
+    dc_power_output["power"] = get_avg_value(dc_power_output["power"].to_list())
     return dc_power_output
 
 def get_avg_value(values):
@@ -76,6 +79,18 @@ def get_avg_value(values):
         if numpy.isnan(values[i]):
             values[i] = (values[i-1] + values[i+1]) / 2
     return values
+
+def get_esb_data(hash_id, start, end):
+    esb_intake = pandas.read_csv(f"/Users/michealmcmagh/Desktop/ise-entrance-submission-project/solarcalc/uploads/{hash_id}.csv")
+    esb_intake = pandas.concat([esb_intake["Read Date and End Time"], esb_intake["Read Value"]], join="inner", axis=1)
+    esb_intake = esb_intake.rename(columns={"Read Date and End Time": "datetime", "Read Value": "power"})
+    # Converts killowatts to watts
+    esb_intake["power"] = esb_intake["power"] * 1000
+    esb_intake["datetime"] = pandas.to_datetime(esb_intake["datetime"], dayfirst=True).dt.tz_localize('UTC')
+    esb_intake = esb_intake.sort_values(by=['datetime'])
+    esb_intake = esb_intake[(esb_intake["datetime"] >= start) & (esb_intake["datetime"] <= end)]
+    return esb_intake
+
 
 '''
 # This function was misinformed in its creation going to keep it in until i figure out if its completely misguided or not
