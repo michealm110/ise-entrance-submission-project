@@ -3,12 +3,45 @@
 {% block content %} 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!--
+<div>
+    <canvas id="solarChart"></canvas>
+    <script>
+fetch("{{ url_for("get_json_data", hash_id=hash_id) }}")
+  .then(response => response.json())
+  .then(data => {
 
+    const powerOutput = data; 
+    const ctx = document.getElementById('solarChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [{
+          label: 'Solar Power Output (W)',
+          data: powerOutput,
+          borderColor: 'rgb(75, 190, 190)',
+          tension: 0.1
+        }]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: {title: { display: true, text: 'Time'
+          } },
+          y: { title: { display: true, text: 'Sola Power Output (W)' } }
+        }
+      }
+    });
+  })
+  .catch(error => console.error('Error loading JSON:', error))
+    </script>
+</div>
+-->
 <hr>
 <h2>Enter Date Range</h2>
 <form  method="GET">
     <label for="start">Start Date:</label>
-    <input type="date" id="start" name="start" min="2024-01-01" max="2024-12-31" value="2024-01-01" required>
+    <input type="date" id="start" name="start" min="2024-01-01" max="2024-12-31" value="2024-07-23" required>
 
 </form>
 <hr>
@@ -17,8 +50,7 @@
     <script>
         function updateChartData(data1){
             myChart.data.labels = data1.map(d => d.x);
-            myChart.data.datasets[0].data = data1.map(d => d.y1);
-            myChart.data.datasets[1].data = data1.map(d => d.y2);
+            myChart.data.datasets[0].data = data1.map(d => d.y);
             myChart.update();
         }
 
@@ -30,12 +62,6 @@
             data: {
                 labels: [],  // Time values
                 datasets: [
-                {
-                    label: "Power Output 1 (W)",
-                    data: [],
-                    borderColor: "blue",
-                    fill: false
-                },
                 {
                     label: "Power Output 2 (W)",
                     data: [],
@@ -55,13 +81,13 @@
             });
             
             start_date.addEventListener("change", (event) => {
-                fetch("{{ url_for("get_combined_json_data_for_simulator", hash_id=hash_id) }}" + "?start=" + start_date.value)
+                fetch("{{ url_for("get_excess_json_data", hash_id=hash_id) }}" + "?start=" + start_date.value)
                 .then(response => response.json())
                 .then(updateChartData);
             });
 
        
-        fetch("{{ url_for("get_combined_json_data_for_simulator", hash_id=hash_id) }}" + "?start=" + start_date.value)
+        fetch("{{ url_for("get_excess_json_data", hash_id=hash_id) }}" + "?start=" + start_date.value)
         .then(response => response.json())
         .then(updateChartData);
     </script>

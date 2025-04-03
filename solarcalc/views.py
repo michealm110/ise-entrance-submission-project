@@ -8,6 +8,8 @@ from datetime import datetime, timedelta, timezone
 import pytz
 import os
 from werkzeug.utils import secure_filename
+import numpy
+import json
 
 UPLOAD_FOLDER = "/Users/michealmcmagh/Desktop/ise-entrance-submission-project/solarcalc/uploads"
 ALLOWED_EXTENSIONS = {"csv"}
@@ -105,8 +107,21 @@ def get_json_data(hash_id):
     dc_power_output = calc_power_output(lat_lon[0], lat_lon[1], decoded_id_row_from_db[3], decoded_id_row_from_db[4], decoded_id_row_from_db[5], decoded_id_row_from_db[6])
     dc_power_output = dc_power_output.reset_index().rename(columns={"time(UTC)": "x", 0: "y"})
 
-    dc_power_output = dc_power_output[(dc_power_output["x"] >= "2024-07-23T00:00:00.000") & (dc_power_output["x"] < "2024-07-24T00:00:00.000")]
+    times = pandas.date_range(start="2024-01-01 00:30:00.000", end="2024-12-31 00:00:00.000", freq="1h", tz="UTC")
 
+    new_rows = pandas.DataFrame({"x": times, "y": numpy.nan})
+        
+    dc_power_output = pandas.concat([dc_power_output, new_rows], ignore_index=True)
+
+    dc_power_output = dc_power_output.sort_values(by="x").reset_index(drop=True)
+
+    if numpy.isnan(dc_power_output.loc[0, "y"]):
+        dc_power_output.loc[0, "y"] = 0
+
+    if numpy.isnan(dc_power_output.loc[len(dc_power_output) - 1, "y"]):
+        dc_power_output.loc[len(dc_power_output) - 1, "y"] = 0
+
+    dc_power_output["y"] = get_avg_value(dc_power_output["y"].to_list())
 
     json_power_output = dc_power_output.to_json(orient="records", date_format="iso")
     return json_power_output
@@ -120,17 +135,71 @@ def get_esb_json_data(hash_id):
     esb_intake["y"] = esb_intake["y"] * 1000
     esb_intake["x"] = pandas.to_datetime(esb_intake["x"], dayfirst=True).dt.tz_localize('UTC')
     esb_intake = esb_intake.sort_values(by=['x'])
-    esb_intake = esb_intake[(esb_intake["x"] >= "2024-07-23T00:00:00.000") & (esb_intake["x"] < "2024-07-24T00:00:00.000")]
-
 
     json_esb_intake = esb_intake.to_json(orient='records', date_format='iso')
 
     return json_esb_intake
 
+@app.route("/<hash_id>/full_combined_data")
+def get_combined_json_data(hash_id):
+    solar_json_data = get_json_data(hash_id=hash_id)
+    esb_json_data = get_esb_json_data(hash_id=hash_id)
+    solar_data = pandas.DataFrame.from_records(json.loads(solar_json_data))
+    esb_data = pandas.DataFrame.from_records(json.loads(esb_json_data))
+    solar_data["x"] = pandas.to_datetime(solar_data["x"])
+    esb_data["x"] = pandas.to_datetime(esb_data["x"])
+    start = pandas.Timestamp("2024-01-01 00:00:00", tz="UTC")
+    end = pandas.Timestamp("2024-12-31 23:59:59", tz="UTC")
+    solar_data = solar_data[(solar_data["x"] >= start) & (solar_data["x"] <= end)]
+    esb_data = esb_data[(esb_data["x"] >= start) & (esb_data["x"] <= end)]
+    combined_data = pandas.merge(solar_data.rename(columns={"y": "y1"}), esb_data.rename(columns={"y": "y2"}), on="x", how="outer")
+    combined_data_json = combined_data.to_json(orient="records", date_format="iso")
+
+    return combined_data_json
+
+@app.route("/<hash_id>/combineddata", methods=["GET"])
+def get_combined_json_data_for_simulator(hash_id):
+    combined_json_data = get_combined_json_data(hash_id=hash_id)
+    combined_data = pandas.DataFrame.from_records(json.loads(combined_json_data))
+    start = flask.request.args.get("start", "2024-")
+    start = pandas.to_datetime(start).tz_localize("UTC")
+    end = start + pandas.Timedelta(hours=23, minutes=30)    
+    combined_data["x"] = pandas.to_datetime(combined_data["x"]) 
+    combined_data = combined_data[(combined_data["x"] >= start) & (combined_data["x"] < end)]
+
+    combined_json = combined_data.to_json(orient="records", date_format="iso")
+
+    return combined_json
+
     
+
 @app.route("/<hash_id>/simulate")
 def simulate(hash_id):
     return flask.render_template("simulator.html", hash_id=hash_id)
+
+@app.route("/<hash_id>/excess_energy")   
+def  get_excess_json_data(hash_id):
+    combined_json_data = get_combined_json_data(hash_id=hash_id)
+    combined_data = pandas.DataFrame.from_records(json.loads(combined_json_data))
+    start = flask.request.args.get("start", "2024-01-01")
+    start = pandas.to_datetime(start).tz_localize("UTC")
+    end = start + pandas.Timedelta(hours=23, minutes=30) 
+    combined_data["x"] = pandas.to_datetime(combined_data["x"]) 
+    combined_data = combined_data[(combined_data["x"] >= start) & (combined_data["x"] < end)]
+    if "y1" in combined_data.columns and "y2" in combined_data.columns:
+        combined_data["y"] = combined_data["y2"] - combined_data["y1"]
+        combined_data.loc[combined_data["y"] < 0, "y"] = 0
+    else:
+        combined_data["y"] = 0
+    combined_data = combined_data.drop(columns=["y1", "y2"])
+    combined_json = combined_data.to_json(orient="records", date_format="iso")
+    return combined_json
+
+
+
+@app.route("/<hash_id>/simulate_excess_energy")
+def simulate_excess_energy(hash_id):
+    return flask.render_template("simulate_excess_energy.html", hash_id=hash_id)
 
 @app.route("/<hash_id>/process", methods=["GET", "POST"])
 def process_esb(hash_id):
@@ -228,6 +297,12 @@ def calc_power_output(latitude, longitude, rated_power_per_panel, number_of_pane
 
     return dc_power * number_of_panels
 
+def get_avg_value(values):
+    values = numpy.array(values)
+    for i in range(1, len(values)):
+        if numpy.isnan(values[i]):
+            values[i] = (values[i-1] + values[i+1]) / 2
+    return values
 '''
 # This function was misinformed in its creation going to keep it in until i figure out if its completely misguided or not
 def rounds_and_calculates_a_year_of_dates():

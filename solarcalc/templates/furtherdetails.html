@@ -33,5 +33,10 @@
 </div>
 </form>
 <hr>
-<a href="{{ url_for("simulate", hash_id=hash_id) }}">Simulate</a>
+
+<ul>
+<li><a href="{{ url_for("simulate", hash_id=hash_id) }}">Simulate</a></li>
+<li><a href="{{ url_for("simulate_excess_energy", hash_id=hash_id) }}">Chart the grid energy requirement</a></li>
+</ul>
+
 {% endblock %}
