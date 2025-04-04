@@ -3,12 +3,12 @@
 {% block content %} 
 <form action="{{ url_for("get_detailed_user_data" , hash_id=hash_id) }}" method="POST">
 <div>
-    <label for="rated_power_per_panel">Enter the power rating of your solar panel:</label>
-    <input type="number" min="0" name="rated_power_per_panel" value={{ rated_power_per_panel }} required>
+    <label for="rated_power_per_panel">Enter the power rating in Watts of your solar panels:</label>
+    <input type="number" min="0" max="1000" name="rated_power_per_panel" value={{ rated_power_per_panel }} required>
 </div>
 <div>
-    <label for="number_of_panels">Enter the number of panels you own:</label>
-    <input type="number" name="number_of_panels" value={{ number_of_panels }} required>
+    <label for="number_of_panels">Enter the number of panels you propose to install:</label>
+    <input type="number" min="1" max="100" name="number_of_panels" value={{ number_of_panels }} required>
 </div>
 <div>
     <label for="panel_azimuth">Enter the panel azimuth in degrees as an integer:</label>
@@ -18,6 +18,21 @@
     <label for="panel_tilt">Enter the panel tilt from 0 being horizontal to 90 degrees being vertical:</label>
     <input type="number" min="0" max="90" name="panel_tilt" value={{ panel_tilt }} required>
 </div>
+<div>
+    <label for="installation_costs">Enter the installation cost of your solar panels:</label>
+    <input type="number" min="0" max="20000" name="installation_costs" value={{ installation_costs }} required>
+</div>
+<div>
+    <label for="import_tarriff">Enter the unit rate you will pay in Euros for electriciy</label>
+    <input type="number" min="0" max="1" step="0.01" name="import_tarriff" value={{ import_tarriff }} required>
+</div>
+<div>
+    <label for="export_tarriff">Enter the unit rate you will be paid in Euros for excess energy</label>
+    <input type="number" min="0" max="1" step="0.01" name="export_tarriff" value={{ export_tarriff }} required>
+</div>
+<div>
+    <label for="interest_rate">Enter the interest rate you would earn on an alternative investment</label>
+    <input type="number" min="0" max="20" step="0.1" name="interest_rate" value={{ interest_rate }} required>
 <div>
     <input type="submit" value="save">
 </div>

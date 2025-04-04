@@ -105,8 +105,8 @@
   
     function updateChart(data) {
         const labels = data.map(item => item.month);
-        const exportData = data.map(item => item.export); 
-        const importData = data.map(item => item.import); 
+        const exportData = data.map(item => item.power_export); 
+        const importData = data.map(item => item.power_import); 
     
         const ctx = document.getElementById("comparisonBarChart").getContext("2d");
     
