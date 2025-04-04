@@ -1,18 +1,26 @@
 {% extends "layout.html" %}
-{% block header %}Simulator{% endblock %}
+{% block header %}{% endblock %}
+
+{% block navbar_right %}
+    <form class="d-flex form-inline my-2 my-lg-0" method="GET">
+        <label for="start">Enter Date:</label>
+        <input class="form-control mr-sm-2" type="date" id="start" name="start" min="2024-01-01" max="2024-12-31" value="2024-07-23" required>   
+    </form>
+{% endblock %}
+
+
 {% block content %} 
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
 <hr>
-<h2>Enter Date Range</h2>
-<form  method="GET">
-    <label for="start">Start Date:</label>
-    <input type="date" id="start" name="start" min="2024-01-01" max="2024-12-31" value="2024-07-23" required>
-</form>
+Pick a date to simulate your energy balance for that day.
 <hr>
 <div>
-    <canvas id="importChart"></canvas>
+    <div class="card my-4 p-3">
+        <h5 class="text-center">Energy Imported Over Time</h5>
+        <canvas id="importChart"></canvas>
+    </div>
     <script>
         function updateComparisonChart(data1) {
             comparisonChart.data.labels = data1.map(d => d.datetime);
@@ -39,7 +47,18 @@
             options: {
                 responsive: true,
                 scales: {
-                    x: {title: { display: true, text: 'Time' } },
+                    x: {
+                        title: { display: true, text: 'Time' },
+                        type: 'time',
+                        time: {
+                            unit: 'hour',
+                            tooltipFormat: 'dd/MM/yyyy HH:mm',
+                            displayFormats: {
+                                hour: 'dd/MM/yyyy HH:mm'
+                            }
+                        },
+                        ticks: {autoSkip: true, maxRotation: 45}
+                    },
                     y: { beginAtZero: true }
                 }
             }
@@ -47,11 +66,14 @@
     </script>
 </div>
 <div>
-    <canvas id="excessChart"></canvas>
+    <div class="card my-4 p-3">
+        <h5 class="text-center">Energy Exported Over Time</h5>
+        <canvas id="excessChart"></canvas>
+    </div>
     <script>
         function updateExcessChart(data1) {
             excessChart.data.labels = data1.map(d => d.datetime);
-            excessChart.data.datasets[0].data = data1.map(d => d.power_excess);
+            excessChart.data.datasets[0].data = data1.map(d => d.power_export);
             excessChart.update();
         }
 
@@ -73,7 +95,18 @@
             options: {
                 responsive: true,
                 scales: {
-                    x: {title: { display: true, text: 'Time' } },
+                    x: {
+                        title: { display: true, text: 'Time' },
+                        type: 'time',
+                        time: {
+                            unit: 'hour',
+                            tooltipFormat: 'dd/MM/yyyy HH:mm',
+                            displayFormats: {
+                                hour: 'dd/MM/yyyy HH:mm'
+                            }
+                        },
+                        ticks: {autoSkip: true, maxRotation: 45}
+                     },
                     y: { beginAtZero: true }
                 }
             }
@@ -97,7 +130,10 @@
 </script>
 
 <div>
-<canvas id="comparisonBarChart"></canvas>
+    <div class="card my-4 p-3">
+        <h5 class="text-center">Monthly Import vs Export</h5>
+        <canvas id="comparisonBarChart"></canvas>
+    </div>
 <script>
     fetch("{{ url_for("get_import_and_export_json_data", hash_id=hash_id) }}")
         .then(response => response.json())

@@ -1,38 +1,70 @@
 {% extends "layout.html" %}
-{% block header %}Details{% endblock %}
+
 {% block content %} 
 <form action="{{ url_for("get_detailed_user_data" , hash_id=hash_id) }}" method="POST">
-<div>
-    <label for="rated_power_per_panel">Enter the power rating in Watts of your solar panels:</label>
-    <input type="number" min="0" max="1000" name="rated_power_per_panel" value={{ rated_power_per_panel }} required>
+<div class="row">
+    <div class="col">
+        <label for="rated_power_per_panel">Enter the power rating in Watts of your solar panels:</label>
+    </div>
+    <div class="col">
+        <input type="number" min="0" max="1000" name="rated_power_per_panel" value={{ rated_power_per_panel }} required>
+    </div>
 </div>
-<div>
-    <label for="number_of_panels">Enter the number of panels you propose to install:</label>
-    <input type="number" min="1" max="100" name="number_of_panels" value={{ number_of_panels }} required>
+<div class="row">
+    <div class="col">
+        <label for="number_of_panels">Enter the number of panels you propose to install:</label>    
+    </div>
+    <div class="col">
+        <input type="number" min="1" max="100" name="number_of_panels" value={{ number_of_panels }} required>
+    </div>
 </div>
-<div>
-    <label for="panel_azimuth">Enter the panel azimuth in degrees as an integer:</label>
-    <input type="number" min="0" max="360" name="panel_azimuth" value={{ panel_azimuth }} required>
+<div class="row">
+    <div class="col">
+        <label for="panel_azimuth">Enter the panel azimuth in degrees as an integer:</label>
+    </div>
+    <div class="col">
+        <input type="number" min="0" max="360" name="panel_azimuth" value={{ panel_azimuth }} required>
+    </div>
 </div>
-<div>
-    <label for="panel_tilt">Enter the panel tilt from 0 being horizontal to 90 degrees being vertical:</label>
-    <input type="number" min="0" max="90" name="panel_tilt" value={{ panel_tilt }} required>
+<div class="row">
+    <div class="col">
+        <label for="panel_tilt">Enter the panel tilt from 0 being horizontal to 90 degrees being vertical:</label>
+    </div>
+    <div class="col">
+        <input type="number" min="0" max="90" name="panel_tilt" value={{ panel_tilt }} required>
+    </div>
 </div>
-<div>
-    <label for="installation_costs">Enter the installation cost of your solar panels:</label>
-    <input type="number" min="0" max="20000" name="installation_costs" value={{ installation_costs }} required>
+<div class="row">
+    <div class="col">
+        <label for="installation_costs">Enter the installation cost of your solar panels:</label>
+    </div>
+    <div class="col">
+        <input type="number" min="0" max="20000" name="installation_costs" value={{ installation_costs }} required>
+    </div>
 </div>
-<div>
-    <label for="import_tarriff">Enter the unit rate you will pay in Euros for electriciy</label>
-    <input type="number" min="0" max="1" step="0.01" name="import_tarriff" value={{ import_tarriff }} required>
+<div class="row">
+    <div class="col">
+        <label for="import_tarriff">Enter the unit rate you will pay in Euros for electriciy</label>
+    </div>
+    <div class="col">
+        <input type="number" min="0" max="1" step="0.01" name="import_tarriff" value={{ import_tarriff }} required>
+    </div>
 </div>
-<div>
-    <label for="export_tarriff">Enter the unit rate you will be paid in Euros for excess energy</label>
-    <input type="number" min="0" max="1" step="0.01" name="export_tarriff" value={{ export_tarriff }} required>
+<div class="row">
+    <div class="col">
+        <label for="export_tarriff">Enter the unit rate you will be paid in Euros for excess energy</label>
+    </div>
+    <div class="col">
+        <input type="number" min="0" max="1" step="0.01" name="export_tarriff" value={{ export_tarriff }} required>
+    </div>
 </div>
-<div>
-    <label for="interest_rate">Enter the interest rate you would earn on an alternative investment</label>
-    <input type="number" min="0" max="20" step="0.1" name="interest_rate" value={{ interest_rate }} required>
+<div class="row">
+    <div class="col">
+        <label for="interest_rate">Enter the interest rate you would earn on an alternative investment</label>
+    </div>
+    <div class="col">    
+        <input type="number" min="0" max="20" step="0.1" name="interest_rate" value={{ interest_rate }} required>
+    </div>
 <div>
     <input type="submit" value="save">
 </div>
@@ -47,12 +79,6 @@
     <input type="submit" value="save">
 </div>
 </form>
-<hr>
 
-<ul>
-<li><a href="{{ url_for("simulate", hash_id=hash_id) }}">Simulate</a></li>
-<li><a href="{{ url_for("simulate_excess_energy", hash_id=hash_id) }}">Chart the grid energy requirement</a></li>
-<li><a href="{{ url_for("financial_projections", hash_id=hash_id) }}">Financial Projections</a></li>
-</ul>
 
 {% endblock %}

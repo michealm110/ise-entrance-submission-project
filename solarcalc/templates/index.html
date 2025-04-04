@@ -1,12 +1,40 @@
 {% extends "layout.html" %}
-{% block header %}Index{% endblock %}
+
+{% block navbar %}
+            <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+                <a class="navbar-brand" href="#">SolarCalc</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <!-- <ul class="navbar-nav mr-auto"> -->
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="{{ url_for('index') }}">Home</a>
+                        </li>
+                        <li class="nav-item ">
+                            <a class="nav-link disabled" href="{{ url_for('simulate', hash_id=hash_id) }}">Simulator</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link disabled" href="{{ url_for('financial_projections', hash_id=hash_id) }}">Financial Projection</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link disabled" href="{{ url_for('simulate_excess_energy', hash_id=hash_id) }}">Excess Energy</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+            {% endblock %}
+
+{% block header %}{% endblock %}
 {% block content %} 
 <form action="/" method="POST">
     <div>
         <label for="eircode">Enter your eircode:</label>
         <input type="text" name="eircode" placeholder="Eircode" pattern="^([AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{1}[0-9]{2}|[Dd]{1}6[Ww]{1})[ ]?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}$" required>
     </div>
-        <input type="submit" value="save">
+        <input type="submit" value="Start modelling your installation">
     </div>
 </form>
 {% endblock %}

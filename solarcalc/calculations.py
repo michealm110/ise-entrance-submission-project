@@ -48,9 +48,8 @@ def calc_power_output(latitude, longitude, rated_power_per_panel, number_of_pane
 
     # Plot x-axis: time, y-axis: dc_power on a line chart thingy
     #matplotlib.pyplot.plot
-    
-
-    return dc_power * number_of_panels
+    inverter_efficiency = 0.93
+    return dc_power * number_of_panels * inverter_efficiency
 
 def get_30min_calc_vals(latitude, longitude, rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth, start, end):
     if start.year !=  end.year:

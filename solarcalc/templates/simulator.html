@@ -1,16 +1,21 @@
 {% extends "layout.html" %}
-{% block header %}Simulator{% endblock %}
+{% block header %}{% endblock %}
+
+{% block navbar_right %}
+    <form class="d-flex form-inline my-2 my-lg-0" method="GET">
+        <label for="start">Enter Date:</label>
+        <input class="form-control mr-sm-2" type="date" id="start" name="start" min="2024-01-01" max="2024-12-31" value="2024-07-23" required>   
+    </form>
+{% endblock %}
+
 {% block content %} 
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
 
 <hr>
-<h2>Enter Date Range</h2>
-<form  method="GET">
-    <label for="start">Start Date:</label>
-    <input type="date" id="start" name="start" min="2024-01-01" max="2024-12-31" value="2024-01-01" required>
 
-</form>
 <hr>
 <div>
     <canvas id="comparisonChart"></canvas>
@@ -31,13 +36,13 @@
                 labels: [],  // Time values
                 datasets: [
                 {
-                    label: "Power Output 1 (W)",
+                    label: "Solar Power (W)",
                     data: [],
                     borderColor: "blue",
                     fill: false
                 },
                 {
-                    label: "Power Output 2 (W)",
+                    label: "ESB Power (W)",
                     data: [],
                     borderColor: "red",
                     fill: false
@@ -47,8 +52,20 @@
             options: {
                 responsive: true,
                 scales: {
-                    x: {title: { display: true, text: 'Time'
-                } },
+                    x: {
+                        title: { display: true, text: 'Time' },
+                        type: 'time',
+                        time: {
+                            unit: 'hour',
+                            tooltipFormat: 'dd/MM/yyyy HH:mm',
+                            displayFormats: {
+                                hour: 'dd/MM/yyyy HH:mm'
+                            }
+                        },
+                        ticks: {autoSkip: true, maxRotation: 45}
+
+                        
+                    },
                 y: { beginAtZero: true }
                 }
             }

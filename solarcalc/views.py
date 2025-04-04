@@ -197,8 +197,8 @@ def get_import_and_export_json_data(hash_id):
     # need to convert from power to energy
     for i in range(1,13):
         combined_data_by_month = combined_data[combined_data["datetime"].dt.month == i]
-        monthly_power_excess = combined_data_by_month["power_export"].sum()
-        monthly_power_import = combined_data_by_month["power_import"].sum()
+        monthly_power_excess = combined_data_by_month["power_export"].sum() * .001 * .5
+        monthly_power_import = combined_data_by_month["power_import"].sum() * .001 * .5
         data.append({"month": MONTHS[i-1], "power_export": monthly_power_excess, "power_import": monthly_power_import})
 
     return json.dumps(data)
