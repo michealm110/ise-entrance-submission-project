@@ -11,7 +11,8 @@ import json
 from solarcalc.database import encode_id, decode_id, db_get_connection, get_lat_lon_from_eircode
 from solarcalc.calculations import get_combined_data, get_solar_data, get_combined_data_with_export_import, calculate_solar_totals, make_financial_projection
 
-UPLOAD_FOLDER = "/Users/michealmcmagh/Desktop/ise-entrance-submission-project/solarcalc/uploads"
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 ALLOWED_EXTENSIONS = {"csv"}
 
 def allowed_file(filename):
