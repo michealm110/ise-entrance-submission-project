@@ -1,9 +1,12 @@
+import os
 import pandas
 import numpy
 import pvlib
 
 from solarcalc.database import db_get_connection, decode_id
 
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 
 # Function that calculates power output of a solar panel 
 # Makes assumptions about weather
@@ -88,7 +91,8 @@ def get_avg_value(values):
     return values
 
 def get_esb_data(hash_id, start, end):
-    esb_intake = pandas.read_csv(f"/Users/michealmcmagh/Desktop/ise-entrance-submission-project/solarcalc/uploads/{hash_id}.csv")
+    file_path = os.path.join(UPLOAD_FOLDER, hash_id + ".csv")
+    esb_intake = pandas.read_csv(file_path)
     esb_intake = pandas.concat([esb_intake["Read Date and End Time"], esb_intake["Read Value"]], join="inner", axis=1)
     esb_intake = esb_intake.rename(columns={"Read Date and End Time": "datetime", "Read Value": "power"})
     # Converts killowatts to watts
