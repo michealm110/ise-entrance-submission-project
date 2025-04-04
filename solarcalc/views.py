@@ -9,7 +9,7 @@ import numpy
 import json
 
 from solarcalc.database import encode_id, decode_id, db_get_connection, get_lat_lon_from_eircode
-from solarcalc.calculations import get_combined_data, get_solar_data, get_combined_data_with_export_import
+from solarcalc.calculations import get_combined_data, get_solar_data, get_combined_data_with_export_import, calculate_solar_totals, make_financial_projection
 
 UPLOAD_FOLDER = "/Users/michealmcmagh/Desktop/ise-entrance-submission-project/solarcalc/uploads"
 ALLOWED_EXTENSIONS = {"csv"}
@@ -92,17 +92,31 @@ def get_detailed_user_data(hash_id):
         raise
 
 @app.route("/<hash_id>/financial_projections")
-def get_financial_projections(hash_id):
+def financial_projections(hash_id):
     decoded_id = decode_id(hash_id)
     con = db_get_connection()
     cur = con.cursor()
     cur.execute("SELECT rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth, installation_costs, import_tarriff, export_tarriff, interest_rate FROM simulation WHERE id = ?", (decoded_id,))
     row = cur.fetchone()
     con.close()
-    rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth, installation_costs, cost_per_panel, maintenance_cost_per_year, electricity_rate, efficiency_degradation = row
-    total_cost = installation_costs + (cost_per_panel * number_of_panels)
+
+
+
+    rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth, installation_costs, import_tarriff, export_tarriff, interest_rate = row
+
+    df_comb = get_combined_data_with_export_import(hash_id, pandas.Timestamp("2024-01-01 00:00:00").tz_localize("UTC"), pandas.Timestamp("2024-12-31 23:59:59").tz_localize("UTC"))
+    total_kwh_solar_used, total_kwh_export = calculate_solar_totals(df_comb)
 
     # do calculations and return results as a table
+    df_projection = make_financial_projection(total_kwh_solar_used, total_kwh_export, installation_costs, import_tarriff, export_tarriff, interest_rate)
+    df_projection["Cum. Solar Savings"] = df_projection["Cum. Solar Savings"].apply(lambda x: "{:,.2f}".format(x))
+    df_projection["Cum. Export Revenue"] = df_projection["Cum. Export Revenue"].apply(lambda x: "{:,.2f}".format(x))
+    df_projection["Alt. Investment Value"] = df_projection["Alt. Investment Value"].apply(lambda x: "{:,.2f}".format(x))
+    df_projection["Cap Value"] = df_projection["Cap Value"].apply(lambda x: "{:,.2f}".format(x))
+    df_projection["Net Position"] = df_projection["Net Position"].apply(lambda x: "{:,.2f}".format(x))
+
+    table_html = df_projection.to_html(classes="table table-bordered table-striped", index=True, justify="center", border=0, col_space=100)
+    return flask.render_template("financial_projections.html", hash_id=hash_id, rated_power_per_panel=rated_power_per_panel, number_of_panels=number_of_panels, panel_tilt=panel_tilt, panel_azimuth=panel_azimuth, installation_costs=installation_costs, import_tarriff=import_tarriff, export_tarriff=export_tarriff, interest_rate=interest_rate, total_kwh_solar_used=int(total_kwh_solar_used), total_kwh_export=int(total_kwh_export), table=table_html)
 
 
 @app.route("/<hash_id>/process", methods=["GET", "POST"])

@@ -156,3 +156,34 @@ def get_combined_data_with_export_import(hash_id, start, end):
     combined_data["used_solar_power"] = combined_data["power_solar"] - combined_data["power_export"]
     combined_data.loc[combined_data["used_solar_power"] < 0, "used_solar_power"] = 0
     return combined_data
+
+def make_financial_projection(total_kwh_solar_used, total_kwh_export, install_cost, import_tariff, export_tariff, market_interest_rate):
+   
+    # Financial projection for 25 years
+    years = 25
+    annual_solar_saving = total_kwh_solar_used * import_tariff
+    annual_export_revenue = total_kwh_export * export_tariff
+
+    projection_data = {
+        "Year": range(1, years + 1),
+        "Cum. Solar Savings": [annual_solar_saving * year for year in range(1, years + 1)],
+        "Cum. Export Revenue": [annual_export_revenue * year for year in range(1, years + 1)],
+        "Alt. Investment Value": [install_cost * ((1 + market_interest_rate/100) ** year) for year in range(1, years + 1)],
+        "Cap Value": [ max(0, install_cost - (install_cost / years) * year) for year in range(1, years + 1)],
+
+    }
+
+    projection_df = pandas.DataFrame(projection_data).set_index("Year")
+    projection_df["Net Position"] = projection_df["Cap Value"] + projection_df["Cum. Solar Savings"] + projection_df["Cum. Export Revenue"] - projection_df["Alt. Investment Value"]
+
+    return projection_df
+
+def calculate_solar_totals(df_comb):
+    # Calculate total kWh used and exported
+    df_comb['kwh_export'] = df_comb['power_export'] * 0.5 * 0.001
+    df_comb['kwh_used_solar'] = df_comb['used_solar_power'] * 0.5 * 0.001
+
+    total_kwh_export = df_comb['kwh_export'].sum()
+    total_kwh_solar_used = df_comb['kwh_used_solar'].sum()
+
+    return total_kwh_solar_used, total_kwh_export 
