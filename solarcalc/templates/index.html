@@ -29,6 +29,17 @@
 
 {% block header %}{% endblock %}
 {% block content %} 
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul>
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+
 <form action="/" method="POST">
     <div>
         <label for="eircode">Enter your eircode:</label>

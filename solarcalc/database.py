@@ -32,5 +32,5 @@ def get_lat_lon_from_eircode(eircode):
     if data:
         return float(data[0]["lat"]), float(data[0]["lon"])
     else:
-        return None
+        raise ValueError("Eircode not found or invalid.")
 

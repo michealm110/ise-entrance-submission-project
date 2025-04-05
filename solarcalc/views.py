@@ -20,6 +20,7 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 app = flask.Flask(__name__)
+app.secret_key =b'\xd8\xf1\xb1\xaa\xeaV0\xee\x95\xb5^\xed.\x97\xf0m\\w\xc9B\xc4~\xaa\xe3'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route("/favicon.ico")
@@ -32,7 +33,13 @@ def index():
 
         # Getting and storing all the inputs inputted on index.html
         eircode = flask.request.form.get("eircode")   
-        lat_lon = get_lat_lon_from_eircode(eircode)
+        try:
+            lat_lon = get_lat_lon_from_eircode(eircode)
+        except ValueError:
+            # Invalid eircode, redirect back to index
+            flask.flash("Invalid Eircode. Please try again.")
+            return flask.redirect(flask.url_for("index"))
+        
         lat_lon_string = ",".join(map(str, lat_lon))
 
         # Save all these inputs to the solcalc.db database
