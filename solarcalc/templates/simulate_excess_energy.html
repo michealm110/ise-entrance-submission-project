@@ -14,7 +14,7 @@
 <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
 <hr>
-Pick a date to simulate your energy balance for that day.
+<h5>Pick a date to simulate your energy balance for that day.</h5>
 <hr>
 <div>
     <div class="card my-4 p-3">
@@ -37,7 +37,7 @@ Pick a date to simulate your energy balance for that day.
                 labels: [],
                 datasets: [
                 {
-                    label: "Energy to be Imported (W)",
+                    label: "Electrical Power to be Imported (W)",
                     data: [],
                     borderColor: "red",
                     fill: false
@@ -52,18 +52,21 @@ Pick a date to simulate your energy balance for that day.
                         type: 'time',
                         time: {
                             unit: 'hour',
-                            tooltipFormat: 'dd/MM/yyyy HH:mm',
+                            tooltipFormat: 'HH:mm',
                             displayFormats: {
-                                hour: 'dd/MM/yyyy HH:mm'
+                                hour: 'HH:mm'
                             }
                         },
                         ticks: {autoSkip: true, maxRotation: 45}
                     },
-                    y: { beginAtZero: true }
+                    y: { beginAtZero: true, title: { display: true, text: 'Electrical Power (W)' } }
                 }
             }
         });
     </script>
+</div>
+<div class="card my-4 p-3">
+    <h6 class="text-center">This first graph shows the power that would have needed to have been imported from the ESB, even with the solar panels producing power, on this paticular day.</h6>
 </div>
 <div>
     <div class="card my-4 p-3">
@@ -85,7 +88,7 @@ Pick a date to simulate your energy balance for that day.
                 labels: [],
                 datasets: [
                 {
-                    label: "Energy to be Exported (W)",
+                    label: "Electrical Power to be Exported (W)",
                     data: [],
                     borderColor: "red",
                     fill: false
@@ -100,18 +103,21 @@ Pick a date to simulate your energy balance for that day.
                         type: 'time',
                         time: {
                             unit: 'hour',
-                            tooltipFormat: 'dd/MM/yyyy HH:mm',
+                            tooltipFormat: 'HH:mm',
                             displayFormats: {
-                                hour: 'dd/MM/yyyy HH:mm'
+                                hour: 'HH:mm'
                             }
                         },
                         ticks: {autoSkip: true, maxRotation: 45}
                      },
-                    y: { beginAtZero: true }
+                    y: { beginAtZero: true, title: { display: true, text: 'Electrical Power (W)' } }
                 }
             }
         });
     </script>
+</div>
+<div class="card my-4 p-3">
+    <h6 class="text-center">This second graph shows excess solar power that was not needed, on this paticular day — this power can be exported to the grid, stored in a battery, or used to charge devices like an EV or EDDI.</h6>
 </div>
 <script>
     function fetchAndUpdateCharts() {
@@ -128,7 +134,6 @@ Pick a date to simulate your energy balance for that day.
 
     fetchAndUpdateCharts();
 </script>
-
 <div>
     <div class="card my-4 p-3">
         <h5 class="text-center">Monthly Import vs Export</h5>
@@ -166,12 +171,15 @@ Pick a date to simulate your energy balance for that day.
         options: {
             responsive: true,
             scales: {
-            x: { stacked: false },
-            y: { stacked: false }
+            x: { stacked: false, title: { display: true, text: 'Month' } },
+            y: { stacked: false, title: { display: true, text: 'Electrical Energy (kWh)' } }
             }
         }
     });
     }
 </script>
+</div>
+<div class="card my-4 p-3">
+    <h6 class="text-center">This third graph compares, on a monthly basis, the electrical energy in kilowatt hours that would have needed to have been imported or exported</h6>
 </div>
 {% endblock %}

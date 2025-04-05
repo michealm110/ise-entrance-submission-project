@@ -79,9 +79,30 @@ def get_detailed_user_data(hash_id):
         con.close()
         rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth, installation_costs, import_tarriff, export_tarriff, interest_rate = row
         # some of these need to be rounded as i made them floats in the database
-        rated_power_per_panel = int(rated_power_per_panel)
-        panel_azimuth = int(panel_azimuth)
-        panel_tilt = int(panel_tilt)
+        # if they are None, set them to default values
+        if rated_power_per_panel is not None:
+            rated_power_per_panel = int(rated_power_per_panel)
+        else:
+            rated_power_per_panel = 445
+        if panel_azimuth is not None:
+            panel_azimuth = int(panel_azimuth)
+        else:
+            panel_azimuth = 180
+        if panel_tilt is not None:
+            panel_tilt = int(panel_tilt)
+        else:
+            panel_tilt = 40
+
+        if number_of_panels is None:
+            number_of_panels = 4
+        if installation_costs is  None:
+            installation_costs = 6500
+        if import_tarriff is  None:
+            import_tarriff = 0.25
+        if export_tarriff is  None:
+            export_tarriff = 0.15
+        if interest_rate is  None:
+            interest_rate = 5
 
         print(row)
         if row is not None:

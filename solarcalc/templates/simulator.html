@@ -15,7 +15,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
 
 <hr>
-
+<h4>Visualisation which shows how your solar power production would have performed compared with your electricity usage on this day</h4>
 <hr>
 <div>
     <canvas id="comparisonChart"></canvas>
@@ -33,7 +33,7 @@
         let myChart = new Chart(ctx, {
             type: "line",
             data: {
-                labels: [],  // Time values
+                labels: [], 
                 datasets: [
                 {
                     label: "Solar Power (W)",
@@ -57,16 +57,16 @@
                         type: 'time',
                         time: {
                             unit: 'hour',
-                            tooltipFormat: 'dd/MM/yyyy HH:mm',
+                            tooltipFormat: 'HH:mm',
                             displayFormats: {
-                                hour: 'dd/MM/yyyy HH:mm'
+                                hour: 'HH:mm'
                             }
                         },
                         ticks: {autoSkip: true, maxRotation: 45}
 
                         
                     },
-                y: { beginAtZero: true }
+                y: { beginAtZero: true, title: { display: true, text: 'Electrical Power (W)' } }
                 }
             }
             });
