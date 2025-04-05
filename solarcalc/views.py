@@ -22,6 +22,9 @@ def allowed_file(filename):
 app = flask.Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+@app.route("/favicon.ico")
+def favicon():
+    return "Not Found", 404
 
 @app.route("/", methods=["GET", "POST"])
 def index():
