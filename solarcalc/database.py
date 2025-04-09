@@ -1,8 +1,11 @@
 import sqlite3
 import hashids
 import requests
+import os
 
 ALPHABET = "0123456789abcdefghijklmnopqrstuvwxyz"
+
+SECRET_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
 
 def encode_id(n: int) -> str:
     #salt, hash it, base36 it
@@ -25,7 +28,7 @@ def db_get_connection():
 import requests
 
 def get_lat_lon_from_eircode(eircode):
-    api_key = "AIzaSyA5MFJFJZCCJHbvkzL3bC-9fCqrm4BxxMM"
+    api_key = SECRET_KEY
     base_url = "https://maps.googleapis.com/maps/api/geocode/json"
     params = {
         "address": eircode,
@@ -42,5 +45,7 @@ def get_lat_lon_from_eircode(eircode):
         return location["lat"], location["lng"]
     else:
         raise ValueError(f"Geocoding failed: {data['status']} - {data.get('error_message', '')}")
+    
+
 
 
