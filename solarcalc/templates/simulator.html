@@ -2,86 +2,94 @@
 {% block header %}{% endblock %}
 
 {% block navbar_right %}
-    <form class="d-flex form-inline my-2 my-lg-0" method="GET">
-        <label for="start">Enter Date:</label>
-        <input class="form-control mr-sm-2" type="date" id="start" name="start" min="2024-01-01" max="2024-12-31" value="2024-07-23" required>   
-    </form>
+    {% if esb_file_exists %}
+        <form class="d-flex form-inline my-2 my-lg-0" method="GET">
+            <label for="start">Enter Date:</label>
+            <input class="form-control mr-sm-2" type="date" id="start" name="start" min="2024-01-01" max="2024-12-31" value="2024-07-23" required>   
+        </form>  
+    {% endif %}
 {% endblock %}
 
 {% block content %} 
+    {% if esb_file_exists %}
+        
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
 
-<hr>
-<h4>Visualisation which shows how your solar power production would have performed compared with your electricity usage on this day</h4>
-<hr>
-<div>
-    <canvas id="comparisonChart"></canvas>
-    <script>
-        function updateChartData(data1){
-            myChart.data.labels = data1.map(d => d.datetime);
-            myChart.data.datasets[0].data = data1.map(d => d.power_solar);
-            myChart.data.datasets[1].data = data1.map(d => d.power_esb);
-            myChart.update();
-        }
-
-        const start_date = document.getElementById("start");
-        const ctx = document.getElementById("comparisonChart").getContext("2d");
-
-        let myChart = new Chart(ctx, {
-            type: "line",
-            data: {
-                labels: [], 
-                datasets: [
-                {
-                    label: "Solar Power (W)",
-                    data: [],
-                    borderColor: "blue",
-                    fill: false
-                },
-                {
-                    label: "ESB Power (W)",
-                    data: [],
-                    borderColor: "red",
-                    fill: false
+        <hr>
+        <h4>Visualisation which shows how your solar power production would have performed compared with your electricity usage on this day</h4>
+        <hr>
+        <div>
+            <canvas id="comparisonChart"></canvas>
+            <script>
+                function updateChartData(data1){
+                    myChart.data.labels = data1.map(d => d.datetime);
+                    myChart.data.datasets[0].data = data1.map(d => d.power_solar);
+                    myChart.data.datasets[1].data = data1.map(d => d.power_esb);
+                    myChart.update();
                 }
-                ]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        title: { display: true, text: 'Time' },
-                        type: 'time',
-                        time: {
-                            unit: 'hour',
-                            tooltipFormat: 'HH:mm',
-                            displayFormats: {
-                                hour: 'HH:mm'
-                            }
+
+                const start_date = document.getElementById("start");
+                const ctx = document.getElementById("comparisonChart").getContext("2d");
+
+                let myChart = new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels: [], 
+                        datasets: [
+                        {
+                            label: "Solar Power (W)",
+                            data: [],
+                            borderColor: "blue",
+                            fill: false
                         },
-                        ticks: {autoSkip: true, maxRotation: 45}
-
-                        
+                        {
+                            label: "ESB Power (W)",
+                            data: [],
+                            borderColor: "red",
+                            fill: false
+                        }
+                        ]
                     },
-                y: { beginAtZero: true, title: { display: true, text: 'Electrical Power (W)' } }
-                }
-            }
-            });
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: {
+                                title: { display: true, text: 'Time' },
+                                type: 'time',
+                                time: {
+                                    unit: 'hour',
+                                    tooltipFormat: 'HH:mm',
+                                    displayFormats: {
+                                        hour: 'HH:mm'
+                                    }
+                                },
+                                ticks: {autoSkip: true, maxRotation: 45}
+
+                                
+                            },
+                        y: { beginAtZero: true, title: { display: true, text: 'Electrical Power (W)' } }
+                        }
+                    }
+                    });
+                    
+                    start_date.addEventListener("change", (event) => {
+                        fetch("{{ url_for("get_combined_json_data_for_simulator", hash_id=hash_id) }}" + "?start=" + start_date.value)
+                        .then(response => response.json())
+                        .then(updateChartData);
+                    });
+
             
-            start_date.addEventListener("change", (event) => {
                 fetch("{{ url_for("get_combined_json_data_for_simulator", hash_id=hash_id) }}" + "?start=" + start_date.value)
                 .then(response => response.json())
                 .then(updateChartData);
-            });
+            </script>
+        </div>
 
-       
-        fetch("{{ url_for("get_combined_json_data_for_simulator", hash_id=hash_id) }}" + "?start=" + start_date.value)
-        .then(response => response.json())
-        .then(updateChartData);
-    </script>
-</div>
-
+    {% else %}
+        <h3> Sorry, but you cannot view this page until you have uploaded your esb file </h3>
+    
+    {% endif %}
 {% endblock %}

@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block content %} 
+{% block content %}
 <form action="{{ url_for("get_detailed_user_data" , hash_id=hash_id) }}" method="POST">
 <div class="row">
     <div class="col">
@@ -44,7 +44,7 @@
 </div>
 <div class="row">
     <div class="col">
-        <label for="import_tarriff">Enter the unit rate you will pay in Euros for electriciy</label>
+        <label for="import_tarriff">Enter the unit rate you will pay in Euros for electricity:</label>
     </div>
     <div class="col">
         <input type="number" min="0" max="1" step="0.01" name="import_tarriff" value={{ import_tarriff }} required>
@@ -52,7 +52,7 @@
 </div>
 <div class="row">
     <div class="col">
-        <label for="export_tarriff">Enter the unit rate you will be paid in Euros for excess energy</label>
+        <label for="export_tarriff">Enter the unit rate you will be paid in Euros for excess energy:</label>
     </div>
     <div class="col">
         <input type="number" min="0" max="1" step="0.01" name="export_tarriff" value={{ export_tarriff }} required>
@@ -60,25 +60,38 @@
 </div>
 <div class="row">
     <div class="col">
-        <label for="interest_rate">Enter the interest rate you would earn on an alternative investment</label>
+        <label for="interest_rate">Enter the interest rate you would earn on an alternative investment:</label>
     </div>
     <div class="col">    
         <input type="number" min="0" max="20" step="0.1" name="interest_rate" value={{ interest_rate }} required>
     </div>
 <div>
-    <input type="submit" value="save">
+    <input type="submit" value="Upload" class=" btn-primary mt-2">
 </div>
 </form>
-<hr>
-<form action="{{ url_for("process_esb", hash_id=hash_id) }}", method="POST" enctype=multipart/form-data>
-<div>
-    <label for="esb_file">Upload your ESB file here: </label>
-    <input type="file" name="esb_file" >
-</div>
-<div>
-    <input type="submit" value="save">
-</div>
+
+
+
+<form action="{{ url_for("process_esb", hash_id=hash_id) }}" method="POST" enctype="multipart/form-data" class="my-4">
+    <div>
+        <label for="esb_file">Upload your ESB file here:</label>
+        <input type="file" name="esb_file" id="esb_file" class="form-control mb-2">
+        {% if esb_file_exists %}
+            <div>
+                <p>File uploaded successfully, you can now view the other pages</p>
+            </div>
+        {% else %}
+            <div>
+                <p>Please upload your ESB file to view the other pages</p>
+            </div>
+        {% endif %}
+    </div>
+    <div>
+        <input type="submit" value="Save" class=" btn-primary mt-2">
+    </div>
 </form>
+
+
 
 
 {% endblock %}

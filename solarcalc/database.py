@@ -22,15 +22,25 @@ def db_get_connection():
     return con
 
 
+import requests
+
 def get_lat_lon_from_eircode(eircode):
-    base_url = "https://nominatim.openstreetmap.org/search"
-    headers = {"User-Agent": "MickSolarCalc/1.0"}
-    params = {"q": eircode, "format": "json"}
-    response = requests.get(base_url, headers=headers, params=params)
+    api_key = "AIzaSyA5MFJFJZCCJHbvkzL3bC-9fCqrm4BxxMM"
+    base_url = "https://maps.googleapis.com/maps/api/geocode/json"
+    params = {
+        "address": eircode,
+        "region": "ie",  # Focus the search in Ireland
+        "key": api_key
+    }
+
+    response = requests.get(base_url, params=params)
+    response.raise_for_status()  # Raises an error for bad responses
     data = response.json()
 
-    if data:
-        return float(data[0]["lat"]), float(data[0]["lon"])
+    if data["status"] == "OK":
+        location = data["results"][0]["geometry"]["location"]
+        return location["lat"], location["lng"]
     else:
-        raise ValueError("Eircode not found or invalid.")
+        raise ValueError(f"Geocoding failed: {data['status']} - {data.get('error_message', '')}")
+
 

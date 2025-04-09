@@ -1,79 +1,85 @@
 {% extends "layout.html" %}
-{% block header %}Simulator{% endblock %}
-{% block content %} 
+{% block header %}{% endblock %}
 
-<hr>
+{% block content %}
+    {% if esb_file_exists %}
+     
 
-<br>
-<div class="container mt-4">
-    <div>Summing up the energy used, imported and exported over the year gives the following values:</div>
-    <table>
-        <tr>
-            <td>Total Solar used in house (kWh)</td>
-            <td>{{ total_kwh_solar_used }}</td>
-        </tr>
-        <tr>
-            <td>Energy Exported to grid (kWh)</th>
-            <td>{{ total_kwh_export }}</td>
-        </tr>
-    </table>
-</div>
-<div class="container mt-4">
-    The financial projection uses the following assumptions:
-    <table class="table table-bordered">
-        <tr>
-            <td>Installation cost of solar panels</td>
-            <td>{{ installation_costs }} €</td>
-        </tr>
-        <tr>
-            <td>Number of panels</td>
-            <td>{{ number_of_panels }}</td>
-        </tr>
-        <tr>
-            <td>Rated power per panel</td>
-            <td>{{ rated_power_per_panel }} W</td>
-        </tr>
-        <tr>
-            <td>Panel azimuth</td>
-            <td>{{ panel_azimuth }} degrees</td>
-        </tr>
-        <tr>
-            <td>Panel tilt</td>
-            <td>{{ panel_tilt }} degrees</td>
-        </tr>
-        <tr>
-            <td>Import tariff</td>
-            <td>{{ import_tarriff }} €/kWh</td>
-        </tr>
-        <tr>
-            <td>Export tariff</td>
-            <td>{{ export_tarriff }} €/kWh</td>
-        </tr>
-        <tr>
-            <td>Interest rate on alternative investment</td>
-            <td>{{ interest_rate }} %</td>
-        </tr>
-    </table>
+        <hr>
 
-    Annual solar savings and export revenue are based on the solar projection and actual ESB usage for the year 2024. Each
-    year the savings and revenue are cumulatively added. The capital cost of the solar panels is depreceated over 25 years in a straight line basis.
-    The interest rate is applied to an alternative investment strategy. The interest is compounded annually. This represents using the captial cost instead
-    to pay off a mortgage or invest in a pension fund. For simplicity inflation is assumed to be zero.
-    <br>
-    The simulation does not currently factor in: 
-    <ul>
-        <li>Panels should last 25 years but inverter is likely to need replaced in that time period</li>
-        <li>Effiency losses of panels over time</li>
-        <li>Interest earned on money saved due to panels</li>
-        <li>Decommissioning costs</li>
-        <li>Maintenance costs such as periodic cleaning</li>
-        <li>Grid connection costs</li>
-        <li>Behavioural changes when solar panels are installed, e.g. only heating water during daylight hours</li>
-    <br>
+        <br>
+        <div class="container mt-4">
+            <div>Summing up the energy used, imported and exported over the year gives the following values:</div>
+            <table>
+                <tr>
+                    <td>Total Solar used in house (kWh)</td>
+                    <td>{{ total_kwh_solar_used }}</td>
+                </tr>
+                <tr>
+                    <td>Energy Exported to grid (kWh)</th>
+                    <td>{{ total_kwh_export }}</td>
+                </tr>
+            </table>
+        </div>
+        <div class="container mt-4">
+            The financial projection uses the following assumptions:
+            <table class="table table-bordered">
+                <tr>
+                    <td>Installation cost of solar panels</td>
+                    <td>{{ installation_costs }} €</td>
+                </tr>
+                <tr>
+                    <td>Number of panels</td>
+                    <td>{{ number_of_panels }}</td>
+                </tr>
+                <tr>
+                    <td>Rated power per panel</td>
+                    <td>{{ rated_power_per_panel }} W</td>
+                </tr>
+                <tr>
+                    <td>Panel azimuth</td>
+                    <td>{{ panel_azimuth }} degrees</td>
+                </tr>
+                <tr>
+                    <td>Panel tilt</td>
+                    <td>{{ panel_tilt }} degrees</td>
+                </tr>
+                <tr>
+                    <td>Import tariff</td>
+                    <td>{{ import_tarriff }} €/kWh</td>
+                </tr>
+                <tr>
+                    <td>Export tariff</td>
+                    <td>{{ export_tarriff }} €/kWh</td>
+                </tr>
+                <tr>
+                    <td>Interest rate on alternative investment</td>
+                    <td>{{ interest_rate }} %</td>
+                </tr>
+            </table>
 
-    <h2>Solar Energy Financial Summary</h2>
-    {{ table | safe }}
-</div>
+            Annual solar savings and export revenue are based on the solar projection and actual ESB usage for the year 2024. Each
+            year the savings and revenue are cumulatively added. The capital cost of the solar panels is depreceated over 25 years in a straight line basis.
+            The interest rate is applied to an alternative investment strategy. The interest is compounded annually. This represents using the captial cost instead
+            to pay off a mortgage or invest in a pension fund. For simplicity inflation is assumed to be zero.
+            <br>
+            The simulation does not currently factor in: 
+            <ul>
+                <li>Panels should last 25 years but inverter is likely to need replaced in that time period</li>
+                <li>Effiency losses of panels over time</li>
+                <li>Interest earned on money saved due to panels</li>
+                <li>Decommissioning costs</li>
+                <li>Maintenance costs such as periodic cleaning</li>
+                <li>Grid connection costs</li>
+                <li>Behavioural changes when solar panels are installed, e.g. only heating water during daylight hours</li>
+            <br>
+
+            <h2>Solar Energy Financial Summary</h2>
+            {{ table | safe }}
+        </div>
 
 
+    {% else %}
+        <h3> Sorry, but you cannot view this page until you have uploaded your esb file </h3>
+    {% endif %}
 {% endblock %}

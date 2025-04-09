@@ -2,184 +2,190 @@
 {% block header %}{% endblock %}
 
 {% block navbar_right %}
-    <form class="d-flex form-inline my-2 my-lg-0" method="GET">
-        <label for="start">Enter Date:</label>
-        <input class="form-control mr-sm-2" type="date" id="start" name="start" min="2024-01-01" max="2024-12-31" value="2024-07-23" required>   
-    </form>
+    {% if esb_file_exists %}
+        <form class="d-flex form-inline my-2 my-lg-0" method="GET">
+            <label for="start">Enter Date:</label>
+            <input class="form-control mr-sm-2" type="date" id="start" name="start" min="2024-01-01" max="2024-12-31" value="2024-07-23" required>   
+        </form>
+    {% endif %}
 {% endblock %}
 
-
 {% block content %} 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
-<hr>
-<h5>Pick a date to simulate your energy balance for that day.</h5>
-<hr>
-<div>
-    <div class="card my-4 p-3">
-        <h5 class="text-center">Energy Imported Over Time</h5>
-        <canvas id="importChart"></canvas>
-    </div>
-    <script>
-        function updateComparisonChart(data1) {
-            comparisonChart.data.labels = data1.map(d => d.datetime);
-            comparisonChart.data.datasets[0].data = data1.map(d => d.power_import);
-            comparisonChart.update();
-        }
-
-        const start_date = document.getElementById("start");
-        const comparisonCtx = document.getElementById("importChart").getContext("2d");
-
-        let comparisonChart = new Chart(comparisonCtx, {
-            type: "line",
-            data: {
-                labels: [],
-                datasets: [
-                {
-                    label: "Electrical Power to be Imported (W)",
-                    data: [],
-                    borderColor: "red",
-                    fill: false
+    {% if esb_file_exists %}
+    
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/luxon@3/build/global/luxon.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
+        <hr>
+        <h5>Pick a date to simulate your energy balance for that day.</h5>
+        <hr>
+        <div>
+            <div class="card my-4 p-3">
+                <h5 class="text-center">Energy Imported Over Time</h5>
+                <canvas id="importChart"></canvas>
+            </div>
+            <script>
+                function updateComparisonChart(data1) {
+                    comparisonChart.data.labels = data1.map(d => d.datetime);
+                    comparisonChart.data.datasets[0].data = data1.map(d => d.power_import);
+                    comparisonChart.update();
                 }
-                ]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        title: { display: true, text: 'Time' },
-                        type: 'time',
-                        time: {
-                            unit: 'hour',
-                            tooltipFormat: 'HH:mm',
-                            displayFormats: {
-                                hour: 'HH:mm'
-                            }
-                        },
-                        ticks: {autoSkip: true, maxRotation: 45}
+
+                const start_date = document.getElementById("start");
+                const comparisonCtx = document.getElementById("importChart").getContext("2d");
+
+                let comparisonChart = new Chart(comparisonCtx, {
+                    type: "line",
+                    data: {
+                        labels: [],
+                        datasets: [
+                        {
+                            label: "Electrical Power to be Imported (W)",
+                            data: [],
+                            borderColor: "red",
+                            fill: false
+                        }
+                        ]
                     },
-                    y: { beginAtZero: true, title: { display: true, text: 'Electrical Power (W)' } }
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: {
+                                title: { display: true, text: 'Time' },
+                                type: 'time',
+                                time: {
+                                    unit: 'hour',
+                                    tooltipFormat: 'HH:mm',
+                                    displayFormats: {
+                                        hour: 'HH:mm'
+                                    }
+                                },
+                                ticks: {autoSkip: true, maxRotation: 45}
+                            },
+                            y: { beginAtZero: true, title: { display: true, text: 'Electrical Power (W)' } }
+                        }
+                    }
+                });
+            </script>
+        </div>
+        <div class="card my-4 p-3">
+            <h6 class="text-center">This first graph shows the power that would have needed to have been imported from the ESB, even with the solar panels producing power, on this paticular day.</h6>
+        </div>
+        <div>
+            <div class="card my-4 p-3">
+                <h5 class="text-center">Energy Exported Over Time</h5>
+                <canvas id="excessChart"></canvas>
+            </div>
+            <script>
+                function updateExcessChart(data1) {
+                    excessChart.data.labels = data1.map(d => d.datetime);
+                    excessChart.data.datasets[0].data = data1.map(d => d.power_export);
+                    excessChart.update();
                 }
+
+                const excessCtx = document.getElementById("excessChart").getContext("2d");
+
+                let excessChart = new Chart(excessCtx, {
+                    type: "line",
+                    data: {
+                        labels: [],
+                        datasets: [
+                        {
+                            label: "Electrical Power to be Exported (W)",
+                            data: [],
+                            borderColor: "red",
+                            fill: false
+                        }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            x: {
+                                title: { display: true, text: 'Time' },
+                                type: 'time',
+                                time: {
+                                    unit: 'hour',
+                                    tooltipFormat: 'HH:mm',
+                                    displayFormats: {
+                                        hour: 'HH:mm'
+                                    }
+                                },
+                                ticks: {autoSkip: true, maxRotation: 45}
+                            },
+                            y: { beginAtZero: true, title: { display: true, text: 'Electrical Power (W)' } }
+                        }
+                    }
+                });
+            </script>
+        </div>
+        <div class="card my-4 p-3">
+            <h6 class="text-center">This second graph shows excess solar power that was not needed, on this paticular day — this power can be exported to the grid, stored in a battery, or used to charge devices like an EV or EDDI.</h6>
+        </div>
+        <script>
+            function fetchAndUpdateCharts() {
+                fetch("{{ url_for("get_energy_needed_json_data", hash_id=hash_id) }}" + "?start=" + start_date.value)
+                    .then(response => response.json())
+                    .then(updateComparisonChart);
+
+                fetch("{{ url_for("get_excess_solar_json_data", hash_id=hash_id) }}" + "?start=" + start_date.value)
+                    .then(response => response.json())
+                    .then(updateExcessChart);
             }
-        });
-    </script>
-</div>
-<div class="card my-4 p-3">
-    <h6 class="text-center">This first graph shows the power that would have needed to have been imported from the ESB, even with the solar panels producing power, on this paticular day.</h6>
-</div>
-<div>
-    <div class="card my-4 p-3">
-        <h5 class="text-center">Energy Exported Over Time</h5>
-        <canvas id="excessChart"></canvas>
-    </div>
-    <script>
-        function updateExcessChart(data1) {
-            excessChart.data.labels = data1.map(d => d.datetime);
-            excessChart.data.datasets[0].data = data1.map(d => d.power_export);
-            excessChart.update();
-        }
 
-        const excessCtx = document.getElementById("excessChart").getContext("2d");
+            start_date.addEventListener("change", fetchAndUpdateCharts);
 
-        let excessChart = new Chart(excessCtx, {
-            type: "line",
-            data: {
-                labels: [],
-                datasets: [
-                {
-                    label: "Electrical Power to be Exported (W)",
-                    data: [],
-                    borderColor: "red",
-                    fill: false
+            fetchAndUpdateCharts();
+        </script>
+        <div>
+            <div class="card my-4 p-3">
+                <h5 class="text-center">Monthly Import vs Export</h5>
+                <canvas id="comparisonBarChart"></canvas>
+            </div>
+        <script>
+            fetch("{{ url_for("get_import_and_export_json_data", hash_id=hash_id) }}")
+                .then(response => response.json())
+                .then(data => updateChart(data));
+        
+            function updateChart(data) {
+                const labels = data.map(item => item.month);
+                const exportData = data.map(item => item.power_export); 
+                const importData = data.map(item => item.power_import); 
+            
+                const ctx = document.getElementById("comparisonBarChart").getContext("2d");
+            
+                new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [
+                    {
+                        label: "Energy Export (kWh)",
+                        data: exportData,
+                        backgroundColor: "rgba(54, 162, 235, 0.6)"
+                    },
+                    {
+                        label: "Energy Import (kWh)",
+                        data: importData,
+                        backgroundColor: "rgba(255, 99, 132, 0.6)"
+                    }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                    x: { stacked: false, title: { display: true, text: 'Month' } },
+                    y: { stacked: false, title: { display: true, text: 'Electrical Energy (kWh)' } }
+                    }
                 }
-                ]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: {
-                        title: { display: true, text: 'Time' },
-                        type: 'time',
-                        time: {
-                            unit: 'hour',
-                            tooltipFormat: 'HH:mm',
-                            displayFormats: {
-                                hour: 'HH:mm'
-                            }
-                        },
-                        ticks: {autoSkip: true, maxRotation: 45}
-                     },
-                    y: { beginAtZero: true, title: { display: true, text: 'Electrical Power (W)' } }
-                }
+            });
             }
-        });
-    </script>
-</div>
-<div class="card my-4 p-3">
-    <h6 class="text-center">This second graph shows excess solar power that was not needed, on this paticular day — this power can be exported to the grid, stored in a battery, or used to charge devices like an EV or EDDI.</h6>
-</div>
-<script>
-    function fetchAndUpdateCharts() {
-        fetch("{{ url_for("get_energy_needed_json_data", hash_id=hash_id) }}" + "?start=" + start_date.value)
-            .then(response => response.json())
-            .then(updateComparisonChart);
-
-        fetch("{{ url_for("get_excess_solar_json_data", hash_id=hash_id) }}" + "?start=" + start_date.value)
-            .then(response => response.json())
-            .then(updateExcessChart);
-    }
-
-    start_date.addEventListener("change", fetchAndUpdateCharts);
-
-    fetchAndUpdateCharts();
-</script>
-<div>
-    <div class="card my-4 p-3">
-        <h5 class="text-center">Monthly Import vs Export</h5>
-        <canvas id="comparisonBarChart"></canvas>
-    </div>
-<script>
-    fetch("{{ url_for("get_import_and_export_json_data", hash_id=hash_id) }}")
-        .then(response => response.json())
-        .then(data => updateChart(data));
-  
-    function updateChart(data) {
-        const labels = data.map(item => item.month);
-        const exportData = data.map(item => item.power_export); 
-        const importData = data.map(item => item.power_import); 
-    
-        const ctx = document.getElementById("comparisonBarChart").getContext("2d");
-    
-        new Chart(ctx, {
-        type: "bar",
-        data: {
-            labels: labels,
-            datasets: [
-            {
-                label: "Energy Export (kWh)",
-                data: exportData,
-                backgroundColor: "rgba(54, 162, 235, 0.6)"
-            },
-            {
-                label: "Energy Import (kWh)",
-                data: importData,
-                backgroundColor: "rgba(255, 99, 132, 0.6)"
-            }
-            ]
-        },
-        options: {
-            responsive: true,
-            scales: {
-            x: { stacked: false, title: { display: true, text: 'Month' } },
-            y: { stacked: false, title: { display: true, text: 'Electrical Energy (kWh)' } }
-            }
-        }
-    });
-    }
-</script>
-</div>
-<div class="card my-4 p-3">
-    <h6 class="text-center">This third graph compares, on a monthly basis, the electrical energy in kilowatt hours that would have needed to have been imported or exported</h6>
-</div>
+        </script>
+        </div>
+        <div class="card my-4 p-3">
+            <h6 class="text-center">This third graph compares, on a monthly basis, the electrical energy in kilowatt hours that would have needed to have been imported or exported</h6>
+        </div>
+    {% else %}
+        <h3> Sorry, but you cannot view this page until you have uploaded your esb file </h3>
+    {% endif %}
 {% endblock %}

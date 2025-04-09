@@ -14,6 +14,11 @@ from solarcalc.calculations import get_combined_data, get_solar_data, get_combin
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 ALLOWED_EXTENSIONS = {"csv"}
+REQUIRED_ESB_COLUMNS = {"Read Value", "Read Type", "Read Date and End Time"}
+
+def esb_file_exists(hash_id):
+    esb_file_path = os.path.join(UPLOAD_FOLDER, hash_id + ".csv")
+    return os.path.exists(esb_file_path)
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -47,6 +52,9 @@ def index():
         cur = con.cursor()
         cur.execute("INSERT INTO simulation (eircode , latitude_longitude) VALUES (?,?)", (eircode, lat_lon_string))
         last_row_id = cur.lastrowid
+        # insert default values for the rest of the columns
+        cur.execute("UPDATE simulation SET rated_power_per_panel = ?, number_of_panels = ?, panel_tilt = ?, panel_azimuth = ?, installation_costs = ?, import_tarriff = ?, export_tarriff = ?, interest_rate = ? WHERE id = ?", (435, 10, 35, 180, 6500, 0.25, 0.15, 5, cur.lastrowid))
+        
         con.commit()
         con.close()
 
@@ -61,6 +69,9 @@ def index():
 @app.route("/<hash_id>", methods=["GET", "POST"])
 def get_detailed_user_data(hash_id):
     decoded_id = decode_id(hash_id)
+
+    
+
     if flask.request.method == "POST":
         rated_power_per_panel = flask.request.form.get("rated_power_per_panel")
         number_of_panels = flask.request.form.get("number_of_panels")
@@ -79,6 +90,7 @@ def get_detailed_user_data(hash_id):
         con.commit()
         con.close()
 
+
         return flask.render_template("furtherdetails.html", hash_id=hash_id,  rated_power_per_panel=rated_power_per_panel, number_of_panels=number_of_panels, panel_azimuth=panel_azimuth, panel_tilt=panel_tilt, installation_costs=installation_costs, import_tarriff=import_tarriff, export_tarriff=export_tarriff, interest_rate=interest_rate)
     elif flask.request.method == "GET":
         con = db_get_connection()
@@ -93,7 +105,7 @@ def get_detailed_user_data(hash_id):
         if rated_power_per_panel is not None:
             rated_power_per_panel = int(rated_power_per_panel)
         else:
-            rated_power_per_panel = 445
+            rated_power_per_panel = 435
         if panel_azimuth is not None:
             panel_azimuth = int(panel_azimuth)
         else:
@@ -104,7 +116,7 @@ def get_detailed_user_data(hash_id):
             panel_tilt = 40
 
         if number_of_panels is None:
-            number_of_panels = 4
+            number_of_panels = 10
         if installation_costs is  None:
             installation_costs = 6500
         if import_tarriff is  None:
@@ -113,18 +125,21 @@ def get_detailed_user_data(hash_id):
             export_tarriff = 0.15
         if interest_rate is  None:
             interest_rate = 5
-
+        #esb_file_path = os.path.join(app.config["UPLOAD_FOLDER"], hash_id + ".csv")
+        #esb_file_exists = os.path.exists(esb_file_path)
         print(row)
         if row is not None:
-            return flask.render_template("furtherdetails.html", hash_id=hash_id, rated_power_per_panel=rated_power_per_panel, number_of_panels=number_of_panels, panel_tilt=panel_tilt, panel_azimuth=panel_azimuth, installation_costs=installation_costs, import_tarriff=import_tarriff, export_tarriff=export_tarriff, interest_rate=interest_rate)
+            return flask.render_template("furtherdetails.html", hash_id=hash_id, rated_power_per_panel=rated_power_per_panel, number_of_panels=number_of_panels, panel_tilt=panel_tilt, panel_azimuth=panel_azimuth, installation_costs=installation_costs, import_tarriff=import_tarriff, export_tarriff=export_tarriff, interest_rate=interest_rate, esb_file_exists=esb_file_exists(hash_id))
         else:
             # initial default values:
-            return flask.render_template("furtherdetails.html", hash_id=hash_id, rated_power_per_panel=445, number_of_panels=4, panel_azimuth=180, panel_tilt=40, installation_costs=8500, import_tarriff=0.25, export_tarriff=0.15, interest_rate=0.05)
+            return flask.render_template("furtherdetails.html", hash_id=hash_id, rated_power_per_panel=435, number_of_panels=10, panel_azimuth=180, panel_tilt=40, installation_costs=8500, import_tarriff=0.25, export_tarriff=0.15, interest_rate=0.05, esb_file_exists=esb_file_exists(hash_id))
     else:
         raise
 
 @app.route("/<hash_id>/financial_projections")
 def financial_projections(hash_id):
+    if esb_file_exists(hash_id) == False:
+        return flask.render_template("financial_projections.html", hash_id=hash_id, esb_file_exists=False)
     decoded_id = decode_id(hash_id)
     con = db_get_connection()
     cur = con.cursor()
@@ -148,37 +163,50 @@ def financial_projections(hash_id):
     df_projection["Net Position"] = df_projection["Net Position"].apply(lambda x: "{:,.2f}".format(x))
 
     table_html = df_projection.to_html(classes="table table-bordered table-striped", index=True, justify="center", border=0, col_space=100)
-    return flask.render_template("financial_projections.html", hash_id=hash_id, rated_power_per_panel=rated_power_per_panel, number_of_panels=number_of_panels, panel_tilt=panel_tilt, panel_azimuth=panel_azimuth, installation_costs=installation_costs, import_tarriff=import_tarriff, export_tarriff=export_tarriff, interest_rate=interest_rate, total_kwh_solar_used=int(total_kwh_solar_used), total_kwh_export=int(total_kwh_export), table=table_html)
+    return flask.render_template("financial_projections.html", hash_id=hash_id, rated_power_per_panel=rated_power_per_panel, number_of_panels=number_of_panels, panel_tilt=panel_tilt, panel_azimuth=panel_azimuth, installation_costs=installation_costs, import_tarriff=import_tarriff, export_tarriff=export_tarriff, interest_rate=interest_rate, total_kwh_solar_used=int(total_kwh_solar_used), total_kwh_export=int(total_kwh_export), table=table_html, esb_file_exists=True)
 
 
 @app.route("/<hash_id>/process", methods=["GET", "POST"])
 def process_esb(hash_id):
     if flask.request.method == "POST":
+        file = flask.request.files.get("esb_file")
 
-        # Check if the post request has the file part
-        if "esb_file" not in flask.request.files:
-            # back to details
+        # No file part in the request
+        if not file:
             return flask.redirect(flask.url_for("get_detailed_user_data", hash_id=hash_id))
-        file = flask.request.files["esb_file"]
-        # If the user does not select a file, the browser submits an empty file without a filename
+
         if file.filename == "":
-            # Invalid back to details
             return flask.redirect(flask.url_for("get_detailed_user_data", hash_id=hash_id))
+
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
 
+            # Try to read the file
+            try:
+                df = pandas.read_csv(file)
+            except Exception:
+                return flask.redirect(flask.url_for("get_detailed_user_data", hash_id=hash_id))
+            # Validate expected columns
+            expected_columns = {"Read Value", "Read Type", "Read Date and End Time"}
+            if not expected_columns.issubset(df.columns):
+                return flask.redirect(flask.url_for("get_detailed_user_data", hash_id=hash_id))
+
+            file.stream.seek(0)
             file.save(os.path.join(app.config["UPLOAD_FOLDER"], hash_id + ".csv"))
+
             return flask.redirect(flask.url_for("get_detailed_user_data", hash_id=hash_id))
-    # No valid file redirect
+        return flask.redirect(flask.url_for("get_detailed_user_data", hash_id=hash_id))
     return flask.redirect(flask.url_for("get_detailed_user_data", hash_id=hash_id))
+
 
 @app.route("/<hash_id>/simulate")
 def simulate(hash_id):
-    return flask.render_template("simulator.html", hash_id=hash_id)
+    return flask.render_template("simulator.html", hash_id=hash_id, esb_file_exists=esb_file_exists(hash_id))
+
 
 @app.route("/<hash_id>/simulate_excess_energy")
 def simulate_excess_energy(hash_id):
-    return flask.render_template("simulate_excess_energy.html", hash_id=hash_id)
+    return flask.render_template("simulate_excess_energy.html", hash_id=hash_id, esb_file_exists=esb_file_exists(hash_id))
 
 # JSON Views ###############################################################
 
