@@ -2,10 +2,20 @@
 
 {% block content %}
 <div class="ms-4">
-    <h5 class="mb-1">Step 1: Enter Your System Details</h5>
-    <p>Otherwise we will use the default values listed</p>
+    <h5 class="mb-1">Step 1: Save This Page</h5>
+</div>  
+<div class="card my-4 shadow-sm p-3">
+    <p>We've created a unique URL to store your simulation details</p>
+    <p>To return to this simulation in the future, please save it as a bookmark in your browser.</p>
+    <p>Press Ctrl+D (Windows) or Command+D (Mac) on your keyboard.</p>
+</div>
+
+<div class="ms-4">
+    <h5 class="mb-1">Step 2: Enter Your System Details</h5>
+    
 </div>
 <div class="card my-4 shadow-sm p-3">
+    <p>We have pre-populated the details with sensible defaults for an Irish installation.</p>
     <form action="{{ url_for("get_detailed_user_data" , hash_id=hash_id) }}" method="POST">
         <h5 class="mt-3">System Specifications</h5>
 
@@ -87,7 +97,7 @@
     </form>
 </div>
 <div class="ms-4">
-    <h5 class="mb-1">Step 2: Upload Your ESB Smart Meter Data</h5>
+    <h5 class="mb-1">Step 3: Upload Your ESB Smart Meter Data</h5>
 </div>
 <div class="card my-4 shadow-sm p-3">
    

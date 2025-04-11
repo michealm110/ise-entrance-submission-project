@@ -37,24 +37,39 @@
 {% block header %}{% endblock %}
 {% block content %} 
 
+<div class="text-center my-5">
+    <h1 class="display-4">Welcome to SolarCalc!</h1>
+    <p class="lead">Tool for modeling the performance of your solar panel installation.</p>
+    <hr class="my-4">
+    <p>To get started, simply enter your eircode below. We'll use it to provide accurate solar energy data based on your location.</p>
+    <p>After entering your eircode, you'll be guided to a page where you can input details about your solar panel system and explore financial projections.</p>
+</div>
 
-<form action="/" method="POST">
-    <div>
-        <label for="eircode">Enter your eircode:</label>
-        <input type="text" name="eircode" placeholder="Eircode" pattern="^([AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{1}[0-9]{2}|[Dd]{1}6[Ww]{1})[ ]?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}$" required>
+
+<div class="card mx-auto my-5" style="max-width: 30rem;">
+    <div class="card-body">
+        <h5 class="card-title text-center">Get Started</h5>
+        <p class="card-text text-center">Enter your eircode to begin modeling your solar panel installation.</p>
+        <form action="/" method="POST">
+            <div class="mb-3">
+                <label for="eircode" class="form-label">Eircode:</label>
+                <input type="text" class="form-control" name="eircode" placeholder="Eircode" pattern="^([AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{1}[0-9]{2}|[Dd]{1}6[Ww]{1})[ ]?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}$" required>
+            </div>
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <ul class="list-unstyled">
+                        {% for category, message in messages %}
+                            <li class="alert alert-{{ category }}" role="alert">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            {% endwith %}
+            <div class="d-grid">
+                <input type="submit" class="btn btn-secondary" value="Start Modelling">
+            </div>
+        </form>
     </div>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <ul>
-                {% for category, message in messages %}
-                    <li class="{{ category }}">{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
-    {% endwith %}
-        <input type="submit" value="Start modelling your installation">
-    </div>
-</form>
+</div>
 
 {% endblock %}
 
