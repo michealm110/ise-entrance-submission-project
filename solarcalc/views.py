@@ -31,6 +31,14 @@ app = flask.Flask(__name__)
 app.secret_key =b'\xd8\xf1\xb1\xaa\xeaV0\xee\x95\xb5^\xed.\x97\xf0m\\w\xc9B\xc4~\xaa\xe3'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+@app.route("/<hash_id>/explanation")
+def explanation(hash_id):
+    return flask.render_template("explanation.html", hash_id=hash_id) 
+
+@app.route("/<hash_id>/explanation/<function_to_be_showcased>")  
+def code_showcase(hash_id, function_to_be_showcased):
+    return flask.render_template("code_showcase.html", hash_id=hash_id, function_to_be_showcased=function_to_be_showcased)
+
 @app.route("/favicon.ico")
 def favicon():
     return "Not Found", 404

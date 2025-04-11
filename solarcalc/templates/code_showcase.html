@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Code Showcase - SolarCalc</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="container py-4">
+    <h3 class="mb-4">
+        Code Preview:
+        {% if function_to_be_showcased == "calc_power_output" %}
+            Solar Output Function
+        {% elif function_to_be_showcased == "get_30min_calc_vals" %}
+            30-Minute Averaging Function
+        {% elif function_to_be_showcased == "make_financial_projection" %}
+            Financial Projection Formula
+        {% else %}
+            Unknown Function
+        {% endif %}
+    </h3>
+
+    <div class="card shadow-sm p-3">
+        {% if function_to_be_showcased == "calc_power_output" %}
+            <script src="https://gist.github.com/michealm110/3d25f0123b5cc65c119209168d220f88.js"></script>
+        {% elif function_to_be_showcased == "get_30min_calc_vals" %}
+            <script src="https://gist.github.com/michealm110/70c5eca0624752135b3b599df7cc7197.js"></script>
+        {% elif function_to_be_showcased == "make_financial_projection" %}
+            <script src="https://gist.github.com/michealm110/14e0f3697235fe84b218a826f2e934f1.js"></script>
+        {% else %}
+            <p>This code snippet could not be found.</p>
+        {% endif %}
+    </div>
+
+    <div class="mt-4">
+        <a href="{{ url_for('explanation', hash_id=hash_id) }}" class="btn btn-secondary btn-sm">Back to Explanation</a>
+    </div>
+
+</body>
+</html>

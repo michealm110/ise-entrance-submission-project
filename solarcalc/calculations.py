@@ -60,8 +60,8 @@ def get_30min_calc_vals(latitude, longitude, rated_power_per_panel, number_of_pa
     if start >= end:
         raise ValueError("Start date must be before end date.")
     
-    dc_power_output = calc_power_output(latitude, longitude, rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth, start, end)
-    dc_power_output = dc_power_output.reset_index().rename(columns={"time(UTC)": "datetime", 0: "power"})
+    ac_power_output = calc_power_output(latitude, longitude, rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth, start, end)
+    ac_power_output = ac_power_output.reset_index().rename(columns={"time(UTC)": "datetime", 0: "power"})
 
     act_start = start.replace(year=2024, minute=30)
     act_end = end.replace(year=2024)
@@ -70,18 +70,18 @@ def get_30min_calc_vals(latitude, longitude, rated_power_per_panel, number_of_pa
 
     new_rows = pandas.DataFrame({"datetime": times, "power": numpy.nan})
         
-    dc_power_output = pandas.concat([dc_power_output, new_rows], ignore_index=True)
+    ac_power_output = pandas.concat([ac_power_output, new_rows], ignore_index=True)
 
-    dc_power_output = dc_power_output.sort_values(by="datetime").reset_index(drop=True)
+    ac_power_output = ac_power_output.sort_values(by="datetime").reset_index(drop=True)
 
-    if numpy.isnan(dc_power_output.loc[0, "power"]):
-        dc_power_output.loc[0, "power"] = 0
+    if numpy.isnan(ac_power_output.loc[0, "power"]):
+        ac_power_output.loc[0, "power"] = 0
 
-    if numpy.isnan(dc_power_output.loc[len(dc_power_output) - 1, "power"]):
-        dc_power_output.loc[len(dc_power_output) - 1, "power"] = 0
+    if numpy.isnan(ac_power_output.loc[len(ac_power_output) - 1, "power"]):
+        ac_power_output.loc[len(ac_power_output) - 1, "power"] = 0
 
-    dc_power_output["power"] = get_avg_value(dc_power_output["power"].to_list())
-    return dc_power_output
+    ac_power_output["power"] = get_avg_value(ac_power_output["power"].to_list())
+    return ac_power_output
 
 def get_avg_value(values):
     values = numpy.array(values)
@@ -132,9 +132,9 @@ def get_solar_data(hash_id, start, end):
     _, _, lat_long, rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth = decoded_id_row_from_db
     latitude, longitude = tuple(map(float, lat_long.split(",")))
 
-    dc_power_output = get_30min_calc_vals( latitude, longitude, rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth, start, end)
+    ac_power_output = get_30min_calc_vals( latitude, longitude, rated_power_per_panel, number_of_panels, panel_tilt, panel_azimuth, start, end)
 
-    return dc_power_output
+    return ac_power_output
 
 
 def get_combined_data(hash_id, start, end):

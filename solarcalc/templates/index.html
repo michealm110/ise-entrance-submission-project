@@ -13,24 +13,37 @@
                         <li class="nav-item">
                             <a class="nav-link active" href="{{ url_for('index') }}">Home</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link disabled" href="{{ url_for('get_detailed_user_data', hash_id=hash_id) }}">Details</a>
+                        </li>
                         <li class="nav-item ">
-                            <a class="nav-link disabled" href="{{ url_for('simulate', hash_id=hash_id) }}">Simulator</a>
+                            <a class="nav-link disabled" href="{{ url_for('simulate', hash_id=hash_id) }}">PowerCurve</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link disabled" href="{{ url_for('financial_projections', hash_id=hash_id) }}">Financial Projection</a>
+                            <a class="nav-link disabled" href="{{ url_for('financial_projections', hash_id=hash_id) }}">Financial</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link disabled" href="{{ url_for('simulate_excess_energy', hash_id=hash_id) }}">Excess Energy</a>
+                            <a class="nav-link disabled" href="{{ url_for('simulate_excess_energy', hash_id=hash_id) }}">ExcessEnergy</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link disabled" href="{{ url_for('explanation', hash_id=hash_id) }}">Explanation</a>
+                        </li>
+
                     </ul>
                 </div>
             </nav>
-            {% endblock %}
+    {% endblock %}
 
 {% block header %}{% endblock %}
 {% block content %} 
 
-{% with messages = get_flashed_messages(with_categories=true) %}
+
+<form action="/" method="POST">
+    <div>
+        <label for="eircode">Enter your eircode:</label>
+        <input type="text" name="eircode" placeholder="Eircode" pattern="^([AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{1}[0-9]{2}|[Dd]{1}6[Ww]{1})[ ]?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}$" required>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <ul>
                 {% for category, message in messages %}
@@ -39,14 +52,9 @@
             </ul>
         {% endif %}
     {% endwith %}
-
-<form action="/" method="POST">
-    <div>
-        <label for="eircode">Enter your eircode:</label>
-        <input type="text" name="eircode" placeholder="Eircode" pattern="^([AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{1}[0-9]{2}|[Dd]{1}6[Ww]{1})[ ]?[0-9AaC-Fc-fHhKkNnPpRrTtV-Yv-y]{4}$" required>
-    </div>
         <input type="submit" value="Start modelling your installation">
     </div>
 </form>
+
 {% endblock %}
 
