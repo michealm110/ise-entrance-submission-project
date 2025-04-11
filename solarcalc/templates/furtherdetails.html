@@ -1,95 +1,135 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<form action="{{ url_for("get_detailed_user_data" , hash_id=hash_id) }}" method="POST">
-<div class="row">
-    <div class="col">
-        <label for="rated_power_per_panel">Enter the power rating in Watts of your solar panels:</label>
-    </div>
-    <div class="col">
-        <input type="number" min="0" max="1000" name="rated_power_per_panel" value={{ rated_power_per_panel }} required>
-    </div>
+<div class="ms-4">
+    <h5 class="mb-1">Step 1: Enter Your System Details</h5>
+    <p>Otherwise we will use the default values listed</p>
 </div>
-<div class="row">
-    <div class="col">
-        <label for="number_of_panels">Enter the number of panels you propose to install:</label>    
-    </div>
-    <div class="col">
-        <input type="number" min="1" max="100" name="number_of_panels" value={{ number_of_panels }} required>
-    </div>
-</div>
-<div class="row">
-    <div class="col">
-        <label for="panel_azimuth">Enter the panel azimuth in degrees as an integer:</label>
-    </div>
-    <div class="col">
-        <input type="number" min="0" max="360" name="panel_azimuth" value={{ panel_azimuth }} required>
-    </div>
-</div>
-<div class="row">
-    <div class="col">
-        <label for="panel_tilt">Enter the panel tilt from 0 being horizontal to 90 degrees being vertical:</label>
-    </div>
-    <div class="col">
-        <input type="number" min="0" max="90" name="panel_tilt" value={{ panel_tilt }} required>
-    </div>
-</div>
-<div class="row">
-    <div class="col">
-        <label for="installation_costs">Enter the installation cost of your solar panels:</label>
-    </div>
-    <div class="col">
-        <input type="number" min="0" max="20000" name="installation_costs" value={{ installation_costs }} required>
-    </div>
-</div>
-<div class="row">
-    <div class="col">
-        <label for="import_tarriff">Enter the unit rate you will pay in Euros for electricity:</label>
-    </div>
-    <div class="col">
-        <input type="number" min="0" max="1" step="0.01" name="import_tarriff" value={{ import_tarriff }} required>
-    </div>
-</div>
-<div class="row">
-    <div class="col">
-        <label for="export_tarriff">Enter the unit rate you will be paid in Euros for excess energy:</label>
-    </div>
-    <div class="col">
-        <input type="number" min="0" max="1" step="0.01" name="export_tarriff" value={{ export_tarriff }} required>
-    </div>
-</div>
-<div class="row">
-    <div class="col">
-        <label for="interest_rate">Enter the interest rate you would earn on an alternative investment:</label>
-    </div>
-    <div class="col">    
-        <input type="number" min="0" max="20" step="0.1" name="interest_rate" value={{ interest_rate }} required>
-    </div>
-<div>
-    <input type="submit" value="Save" class=" btn-primary mt-2">
-</div>
-</form>
+<div class="card my-4 shadow-sm p-3">
+    <form action="{{ url_for("get_detailed_user_data" , hash_id=hash_id) }}" method="POST">
+        <h5 class="mt-3">System Specifications</h5>
 
-
-
-<form action="{{ url_for("process_esb", hash_id=hash_id) }}" method="POST" enctype="multipart/form-data" class="my-4">
-    <div>
-        <label for="esb_file">Upload your ESB file here:</label>
-        <input type="file" name="esb_file" id="esb_file" class="form-control mb-2">
-        {% if esb_file_exists %}
-            <div>
-                <p>File uploaded successfully, you can now view the other pages</p>
+        <div class="row">
+            <div class="col">
+                <label for="rated_power_per_panel"><strong>Power Rating(W):</strong> What is the rated power of each solar panel?</label>
             </div>
-        {% else %}
-            <div>
-                <p>Please upload your ESB file to view the other pages</p>
+            <div class="col">
+                <input type="number" min="0" max="1000" name="rated_power_per_panel" value={{ rated_power_per_panel }} required>
             </div>
-        {% endif %}
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="number_of_panels"><strong>Number of Panels: </strong>How many panels are you planning to install?</label>    
+            </div>
+            <div class="col">
+                <input type="number" min="1" max="100" name="number_of_panels" value={{ number_of_panels }} required>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="panel_azimuth"><strong>Panel Azimuth(°): </strong>What direction do your panels face? (0° is North, 90° is East, 180° is South, 270° is West)</label>
+            </div>
+            <div class="col">
+                <input type="number" min="0" max="360" name="panel_azimuth" value={{ panel_azimuth }} required>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="panel_tilt"><strong>Panel Tilt(°): </strong>What angle do your solar panels make with the horizontal plane? (0° is horizontal, 90° is vertical)</label>
+            </div>
+            <div class="col">
+                <input type="number" min="0" max="90" name="panel_tilt" value={{ panel_tilt }} required>
+            </div>
+        </div>
+
+        <h5 class="mt-4">Financial Details</h5>
+        <div class="row">
+            <div class="col">
+                <label for="installation_costs"><strong>Installation Costs(€): </strong>How much will your solar panels cost to install after grants applied?</label>
+            </div>
+            <div class="col">
+                <input type="number" min="0" max="20000" name="installation_costs" value={{ installation_costs }} required>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <label for="import_tarriff"><strong>Unit Import Rate(€): </strong>What is the unit rate you will pay for electricity?</label>
+            </div>
+            <div class="col">
+                <input type="number" min="0" max="1" step="0.01" name="import_tarriff" value={{ import_tarriff }} required>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col">
+                <label for="export_tarriff"><strong>Unit Export Rate(€): </strong>What is the unit rate you will receive for exporting electricity?</label>
+            </div>
+            <div class="col">
+                <input type="number" min="0" max="1" step="0.01" name="export_tarriff" value={{ export_tarriff }} required>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col">
+                <label for="interest_rate"><strong>Interest Rate(%): </strong>What real rate, net of inflation, would you get on an alternative investment?</label>
+            </div>
+            <div class="col">    
+                <input type="number" min="0" max="20" step="0.1" name="interest_rate" value={{ interest_rate }} required>
+            </div>
+        </div>
+        <br>
+        <div>
+            <input type="submit" value="Save" class=" btn-primary mt-2">
+        </div>
+    </form>
+</div>
+<div class="ms-4">
+    <h5 class="mb-1">Step 2: Upload Your ESB Smart Meter Data</h5>
+</div>
+<div class="card my-4 shadow-sm p-3">
+   
+    <form action="{{ url_for("process_esb", hash_id=hash_id) }}" method="POST" enctype="multipart/form-data" class="my-4">
+        <div>
+            <label for="esb_file">Upload your ESB csv file here:</label>
+            <input type="file" name="esb_file" id="esb_file" class="form-control mb-2">
+            {% if esb_file_exists %}
+                <div>
+                    <p>File uploaded successfully, you can now view the other pages</p>
+                </div>
+            {% else %}
+                <div>
+                    <p>Please upload your ESB csv file to view the other pages</p>
+                </div>
+            {% endif %}
+        </div>
+        <div>
+            <input type="submit" value="Upload" class=" btn-primary mt-2">
+        </div>
+    </form>
+</div>
+    <div class="card my-4 shadow-sm p-3">
+        <h6 class="mb-3">How to download your ESB file:</h6>
+        <div class="ms-4">
+            <ol class="ps-3">
+                <li>
+                    <p><a href="https://www.esbnetworks.ie/services/manage-my-meter/view-my-smart-meter-usage"> See instructions to access you smart meter data. </a> </p>
+                </li>
+                <li>
+                    <p>If you need to create an account, see this <a href=" https://www.youtube.com/watch?v=F23nSrYvn2E">youtube video</a></p>
+                </li>
+                <li>
+                    <p>Once you have created an account or logged in, click <strong>"My Energy Consumption"</strong> followed by <strong>"Downloads"</strong></p>
+                </li>
+                <li>
+                    <p>Select the <strong>"30-minute readings in kW"</strong> Download CSV link to get the file.</p>
+                </li>
+            </ol>
+        
     </div>
-    <div>
-        <input type="submit" value="Upload" class=" btn-primary mt-2">
-    </div>
-</form>
+</div>
 
 
 
