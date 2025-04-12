@@ -171,9 +171,8 @@ def make_financial_projection(total_kwh_solar_used, total_kwh_export, install_co
         "Year": range(1, years + 1),
         "Cum. Solar Savings": [annual_solar_saving * year for year in range(1, years + 1)],
         "Cum. Export Revenue": [annual_export_revenue * year for year in range(1, years + 1)],
-        "Alt. Investment Value": [install_cost * ((1 + market_interest_rate/100) ** year) for year in range(1, years + 1)],
         "Cap Value": [ max(0, install_cost - (install_cost / years) * year) for year in range(1, years + 1)],
-
+        "Alt. Investment Value": [install_cost * ((1 + market_interest_rate/100) ** year) for year in range(1, years + 1)]
     }
 
     projection_df = pandas.DataFrame(projection_data).set_index("Year")

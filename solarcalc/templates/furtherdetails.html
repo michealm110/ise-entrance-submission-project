@@ -18,8 +18,7 @@
     <p>We have pre-populated the details with sensible defaults for an Irish installation.</p>
     <form action="{{ url_for("get_detailed_user_data" , hash_id=hash_id) }}" method="POST">
         <h5 class="mt-3">System Specifications</h5>
-
-        <div class="row">
+        <div class="row ms-3">
             <div class="col">
                 <label for="rated_power_per_panel"><strong>Power Rating(W):</strong> What is the rated power of each solar panel?</label>
             </div>
@@ -28,7 +27,7 @@
             </div>
         </div>
 
-        <div class="row">
+        <div class="row ms-3">
             <div class="col">
                 <label for="number_of_panels"><strong>Number of Panels: </strong>How many panels are you planning to install?</label>    
             </div>
@@ -37,7 +36,7 @@
             </div>
         </div>
 
-        <div class="row">
+        <div class="row ms-3">
             <div class="col">
                 <label for="panel_azimuth"><strong>Panel Azimuth(°): </strong>What direction do your panels face? (0° is North, 90° is East, 180° is South, 270° is West)</label>
             </div>
@@ -46,7 +45,7 @@
             </div>
         </div>
 
-        <div class="row">
+        <div class="row ms-3">
             <div class="col">
                 <label for="panel_tilt"><strong>Panel Tilt(°): </strong>What angle do your solar panels make with the horizontal plane? (0° is horizontal, 90° is vertical)</label>
             </div>
@@ -56,7 +55,7 @@
         </div>
 
         <h5 class="mt-4">Financial Details</h5>
-        <div class="row">
+        <div class="row ms-3">
             <div class="col">
                 <label for="installation_costs"><strong>Installation Costs(€): </strong>How much will your solar panels cost to install after grants applied?</label>
             </div>
@@ -64,7 +63,7 @@
                 <input type="number" min="0" max="20000" name="installation_costs" value={{ installation_costs }} required>
             </div>
         </div>
-        <div class="row">
+        <div class="row ms-3">
             <div class="col">
                 <label for="import_tarriff"><strong>Unit Import Rate(€): </strong>What is the unit rate you will pay for electricity?</label>
             </div>
@@ -73,7 +72,7 @@
             </div>
         </div>
         
-        <div class="row">
+        <div class="row ms-3">
             <div class="col">
                 <label for="export_tarriff"><strong>Unit Export Rate(€): </strong>What is the unit rate you will receive for exporting electricity?</label>
             </div>
@@ -82,7 +81,7 @@
             </div>
         </div>
 
-        <div class="row">
+        <div class="row ms-3">
             <div class="col">
                 <label for="interest_rate"><strong>Interest Rate(%): </strong>What real rate, net of inflation, would you get on an alternative investment?</label>
             </div>

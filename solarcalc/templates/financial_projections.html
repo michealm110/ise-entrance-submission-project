@@ -3,80 +3,137 @@
 
 {% block content %}
     {% if esb_file_exists %}
-     
+            <div class="card mt-4 shadow-sm ">
+                <div class="card-header">
+                    <h5 class="">Summary and Assumptions of Our Financial Simulation</h5>
+                    <p class="text-muted mb-0"> Overview of energy totals, how your savings and returns are calculated, and what factors aren't yet included.</p>
+                </div>
+                <div class="card-body">
+                    <div>Summing up the energy used, imported and exported over the year gives the following values:</div>
+                    <ul>
+                        <li>Total Solar used in house (kWh): {{ total_kwh_solar_used }}</li>
+                        <li>Energy Exported to grid (kWh): {{ total_kwh_export }}</li>
+                    </ul>
+                    <div>The projected net financial position after 25 years is:</div>
+                    <ul>
+                        <li>The final net position of your proposed investment is estimated to be: €{{ net_position }}</li>
+                        {% if net_position[0] != "-" %}
+                            <li>This is a reasonable investment and should be considered as a valid option.</li>
+                         {% else %}
+                            <li>This simulation suggests the investment may not be financially beneficial.</li>
+                        {% endif %}
+                    </ul>
+                    <hr>
+                    
+                    <strong>Note: </strong>The annual solar savings and export revenue are based on the solar projection and actual ESB usage for the year 2024. Each
+                    year the savings and revenue are cumulatively added. The capital cost of the solar panels is depreceated over 25 years in a straight line basis.
+                    The interest rate is applied to an alternative investment strategy. The interest is compounded annually. This represents using the captial cost instead
+                    to pay off a mortgage or invest in a pension fund. For simplicity inflation is assumed to be zero.
+                    
+                    <div>
+                        <br>
+                        <strong>Note: </strong>The simulation does not currently factor in: 
+                        <ul>
+                            <li>Panels should last 25 years but inverter is likely to need replaced in that time period</li>
+                            <li>Effiency losses of panels over time</li>
+                            <li>Interest earned on money saved due to panels</li>
+                            <li>Decommissioning costs</li>
+                            <li>Maintenance costs such as periodic cleaning</li>
+                            <li>Grid connection costs</li>
+                            <li>Behavioural changes when solar panels are installed, e.g. only heating water during daylight hours</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="card mt-4 shadow-sm">
+                <div class="card-header mb-0">
+                    <h5 class="">The financial projection uses the following assumptions:</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-hover mb-0">
+                        <tbody>
+                            <tr>
+                                <td>Installation cost of solar panels</td>
+                                <td>{{ installation_costs }} €</td>
+                            </tr>
+                            <tr>
+                                <td>Number of panels</td>
+                                <td>{{ number_of_panels }}</td>
+                            </tr>
+                            <tr>
+                                <td>Rated power per panel</td>
+                                <td>{{ rated_power_per_panel }} W</td>
+                            </tr>
+                            <tr>
+                                <td>Panel azimuth</td>
+                                <td>{{ panel_azimuth }}°</td>
+                            </tr>
+                            <tr>
+                                <td>Panel tilt</td>
+                                <td>{{ panel_tilt }}°</td>
+                            </tr>
+                            <tr>
+                                <td>Import tariff</td>
+                                <td>{{ import_tarriff }} €/kWh</td>
+                            </tr>
+                            <tr>
+                                <td>Export tariff</td>
+                                <td>{{ export_tarriff }} €/kWh</td>
+                            </tr>
+                            <tr>
+                                <td>Interest rate on alternative investment</td>
+                                <td>{{ interest_rate }} %</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-        <hr>
-
-        <br>
-        <div class="container mt-4">
-            <div>Summing up the energy used, imported and exported over the year gives the following values:</div>
-            <table>
-                <tr>
-                    <td>Total Solar used in house (kWh)</td>
-                    <td>{{ total_kwh_solar_used }}</td>
-                </tr>
-                <tr>
-                    <td>Energy Exported to grid (kWh)</th>
-                    <td>{{ total_kwh_export }}</td>
-                </tr>
-            </table>
+            <div class="card mt-4 shadow-sm">
+                <div class="card-header mb-0">
+                  <h5 class="mb-0">Explanation of The Financial Projection's Headings</h5>
+                </div>
+                <div class="card-body">
+                  <table class="table table-hover table-responsive mb-0">
+                    <tbody>
+                      <tr>
+                        <td><strong>Cumulative Solar Savings</strong></td>
+                        <td>The total amount of money saved over the years from using your own solar energy instead of purchasing electricity from the grid.</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Cumulative Export Revenue</strong></td>
+                        <td>The total income earned from exporting your unused solar energy back to the grid and receiving a feed-in tariff or payment.</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Capital Value</strong></td>
+                        <td>The remaining value of your solar panel system over time, assuming straight-line depreciation over 25 years.</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Alternative Investment Value</strong></td>
+                        <td>The amount your installation money could have grown to if invested elsewhere (e.g., mortgage or pension) at the given interest rate.</td>
+                      </tr>
+                      <tr>
+                        <td><strong>Net Position</strong></td>
+                        <td>Your overall financial outcome: Your combined solar savings, plus your cumulatitive export revenue, plus the remaining capital value of your system minus the alternative investment value.</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+         
+            <div class="card mt-4 shadow-sm">
+                <div class="card-header mb-0">
+                    
+                    <h3 class="">Solar Energy Financial Projection: </h3>
+                </div>
+                <div class="card-body">
+                    {{ table | safe }}
+                </div>
+            </div>
+         
         </div>
-        <div class="container mt-4">
-            The financial projection uses the following assumptions:
-            <table class="table table-bordered">
-                <tr>
-                    <td>Installation cost of solar panels</td>
-                    <td>{{ installation_costs }} €</td>
-                </tr>
-                <tr>
-                    <td>Number of panels</td>
-                    <td>{{ number_of_panels }}</td>
-                </tr>
-                <tr>
-                    <td>Rated power per panel</td>
-                    <td>{{ rated_power_per_panel }} W</td>
-                </tr>
-                <tr>
-                    <td>Panel azimuth</td>
-                    <td>{{ panel_azimuth }} degrees</td>
-                </tr>
-                <tr>
-                    <td>Panel tilt</td>
-                    <td>{{ panel_tilt }} degrees</td>
-                </tr>
-                <tr>
-                    <td>Import tariff</td>
-                    <td>{{ import_tarriff }} €/kWh</td>
-                </tr>
-                <tr>
-                    <td>Export tariff</td>
-                    <td>{{ export_tarriff }} €/kWh</td>
-                </tr>
-                <tr>
-                    <td>Interest rate on alternative investment</td>
-                    <td>{{ interest_rate }} %</td>
-                </tr>
-            </table>
 
-            Annual solar savings and export revenue are based on the solar projection and actual ESB usage for the year 2024. Each
-            year the savings and revenue are cumulatively added. The capital cost of the solar panels is depreceated over 25 years in a straight line basis.
-            The interest rate is applied to an alternative investment strategy. The interest is compounded annually. This represents using the captial cost instead
-            to pay off a mortgage or invest in a pension fund. For simplicity inflation is assumed to be zero.
-            <br>
-            The simulation does not currently factor in: 
-            <ul>
-                <li>Panels should last 25 years but inverter is likely to need replaced in that time period</li>
-                <li>Effiency losses of panels over time</li>
-                <li>Interest earned on money saved due to panels</li>
-                <li>Decommissioning costs</li>
-                <li>Maintenance costs such as periodic cleaning</li>
-                <li>Grid connection costs</li>
-                <li>Behavioural changes when solar panels are installed, e.g. only heating water during daylight hours</li>
-            <br>
-
-            <h2>Solar Energy Financial Summary</h2>
-            {{ table | safe }}
-        </div>
 
 
     {% else %}

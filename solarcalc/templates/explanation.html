@@ -5,17 +5,20 @@
         <div class="card shadow-sm p-4 mb-4">
             <h4 class="mb-3">What We Did</h4>
           
-            <p class="fs-6">We developed a comprehensive simulation tool that models your solar panel system's performance using real-world data and established photovoltaic modeling techniques. Here's how each component contributes to the simulation:</p>
+            <p class="fs-6">We developed a simulation tool that models your solar panel system's performance using real-world data and established photovoltaic modeling techniques. Here's how each component contributes to the simulation:</p>
           
             <ul class="list-group list-group-flush mb-3">
               <li class="list-group-item">
                 <strong>Solar Output Calculation:</strong> Utilizing the <strong>calc_power_output</strong> function, we estimate the hourly DC power output of your solar panels based on your location, panel specifications, and orientation. This function leverages the PVGIS Typical Meteorological Year (TMY) data to simulate realistic solar irradiance and temperature conditions. The calculation incorporates factors such as solar position, irradiance on the panel surface, and module temperature to provide an accurate power output estimate.
               </li>
               <li class="list-group-item">
-                <strong>30-Minute Interval Averaging:</strong> To align the simulated solar output with typical energy consumption data intervals, the <strong>get_30min_calc_vals</strong> function interpolates the hourly power output to 30-minute intervals. This ensures a more precise comparison between your solar generation and energy usage patterns.
+                <strong>30-Minute Interval Averaging: </strong>To align the simulated solar output with typical energy consumption data intervals, the <strong>get_30min_calc_vals</strong> function interpolates the hourly power output to 30-minute intervals. This ensures a more precise comparison between your solar generation and energy usage patterns.
               </li>
               <li class="list-group-item">
                 <strong>Financial Projection:</strong> The <strong>make_financial_projection</strong> function models the financial implications of your solar investment over a 25-year period. It calculates cumulative savings from self-consumed solar energy, revenue from excess energy exported to the grid, and compares these against the potential returns from a traditional market investment. The function also accounts for the depreciating value of your solar system over time, providing a comprehensive view of your net financial position.
+              </li>
+              <li class="list-group-item">
+                <strong>Personalized Data Storage:</strong> To securely store and retrieve your simulation inputs, we use a unique identifier system powered by <strong>hashids</strong>. When you submit your data, it's saved in a lightweight database and linked to a custom alphanumeric code (your <em>hashid</em>). This allows you to return to your personalized results page at any time by visiting the unique URL associated with your hashid — no login or signup required.
               </li>
             </ul>
           
@@ -25,6 +28,7 @@
                     <a href="{{ url_for("code_showcase", hash_id=hash_id, function_to_be_showcased="calc_power_output") }}" class="btn btn-outline-secondary btn-sm">View Solar Output Function</a>
                     <a href="{{ url_for("code_showcase", hash_id=hash_id, function_to_be_showcased="get_30min_calc_vals") }}" class="btn btn-outline-secondary btn-sm">View 30-Minute Averaging Function </a>
                     <a href="{{ url_for("code_showcase", hash_id=hash_id, function_to_be_showcased="make_financial_projection") }}" class="btn btn-outline-secondary btn-sm">View Financial Projection Function</a>
+                    <a href="{{ url_for("code_showcase", hash_id=hash_id, function_to_be_showcased="hashids") }}" class="btn btn-outline-secondary btn-sm"> View How Your Data is Securely Stored</a>
                 </div>
             </div>
         </div>

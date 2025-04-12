@@ -39,9 +39,9 @@ def explanation(hash_id):
 def code_showcase(hash_id, function_to_be_showcased):
     return flask.render_template("code_showcase.html", hash_id=hash_id, function_to_be_showcased=function_to_be_showcased)
 
-@app.route("/favicon.ico")
-def favicon():
-    return "Not Found", 404
+#@app.route("/favicon.ico")
+#def favicon():
+#    return "Not Found", 404
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -172,9 +172,9 @@ def financial_projections(hash_id):
     df_projection["Alt. Investment Value"] = df_projection["Alt. Investment Value"].apply(lambda x: "{:,.2f}".format(x))
     df_projection["Cap Value"] = df_projection["Cap Value"].apply(lambda x: "{:,.2f}".format(x))
     df_projection["Net Position"] = df_projection["Net Position"].apply(lambda x: "{:,.2f}".format(x))
-
-    table_html = df_projection.to_html(classes="table table-bordered table-striped", index=True, justify="center", border=0, col_space=100)
-    return flask.render_template("financial_projections.html", hash_id=hash_id, rated_power_per_panel=rated_power_per_panel, number_of_panels=number_of_panels, panel_tilt=panel_tilt, panel_azimuth=panel_azimuth, installation_costs=installation_costs, import_tarriff=import_tarriff, export_tarriff=export_tarriff, interest_rate=interest_rate, total_kwh_solar_used=int(total_kwh_solar_used), total_kwh_export=int(total_kwh_export), table=table_html, esb_file_exists=True)
+    net_position = df_projection["Net Position"].iloc[-1]
+    table_html = df_projection.to_html(classes="table table-bordered table-striped table-hover text-end", index=True, justify="center", border=0, col_space=100)
+    return flask.render_template("financial_projections.html", hash_id=hash_id, rated_power_per_panel=rated_power_per_panel, number_of_panels=number_of_panels, panel_tilt=panel_tilt, panel_azimuth=panel_azimuth, installation_costs=installation_costs, import_tarriff=import_tarriff, export_tarriff=export_tarriff, interest_rate=interest_rate, total_kwh_solar_used=int(total_kwh_solar_used), total_kwh_export=int(total_kwh_export), table=table_html, esb_file_exists=True, net_position=net_position)
 
 
 @app.route("/<hash_id>/process", methods=["GET", "POST"])
