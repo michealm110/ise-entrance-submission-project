@@ -39,10 +39,6 @@ def explanation(hash_id):
 def code_showcase(hash_id, function_to_be_showcased):
     return flask.render_template("code_showcase.html", hash_id=hash_id, function_to_be_showcased=function_to_be_showcased)
 
-#@app.route("/favicon.ico")
-#def favicon():
-#    return "Not Found", 404
-
 @app.route("/", methods=["GET", "POST"])
 def index():
     if flask.request.method == "POST":

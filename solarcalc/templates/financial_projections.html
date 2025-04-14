@@ -14,15 +14,7 @@
                         <li>Total Solar used in house (kWh): {{ total_kwh_solar_used }}</li>
                         <li>Energy Exported to grid (kWh): {{ total_kwh_export }}</li>
                     </ul>
-                    <div>The projected net financial position after 25 years is:</div>
-                    <ul>
-                        <li>The final net position of your proposed investment is estimated to be: €{{ net_position }}</li>
-                        {% if net_position[0] != "-" %}
-                            <li>This is a reasonable investment and should be considered as a valid option.</li>
-                         {% else %}
-                            <li>This simulation suggests the investment may not be financially beneficial.</li>
-                        {% endif %}
-                    </ul>
+                    
                     <hr>
                     
                     <strong>Note: </strong>The annual solar savings and export revenue are based on the solar projection and actual ESB usage for the year 2024. Each
@@ -96,26 +88,26 @@
                 <div class="card-body">
                   <table class="table table-hover table-responsive mb-0">
                     <tbody>
-                      <tr>
-                        <td><strong>Cumulative Solar Savings</strong></td>
-                        <td>The total amount of money saved over the years from using your own solar energy instead of purchasing electricity from the grid.</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Cumulative Export Revenue</strong></td>
-                        <td>The total income earned from exporting your unused solar energy back to the grid and receiving a feed-in tariff or payment.</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Capital Value</strong></td>
-                        <td>The remaining value of your solar panel system over time, assuming straight-line depreciation over 25 years.</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Alternative Investment Value</strong></td>
-                        <td>The amount your installation money could have grown to if invested elsewhere (e.g., mortgage or pension) at the given interest rate.</td>
-                      </tr>
-                      <tr>
-                        <td><strong>Net Position</strong></td>
-                        <td>Your overall financial outcome: Your combined solar savings, plus your cumulatitive export revenue, plus the remaining capital value of your system minus the alternative investment value.</td>
-                      </tr>
+                        <tr>
+                            <td><strong>Cumulative Solar Savings</strong></td>
+                            <td>The total amount of money saved over the years from using your own solar energy instead of purchasing electricity from the grid.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Cumulative Export Revenue</strong></td>
+                            <td>The total income earned from exporting your unused solar energy back to the grid and receiving a feed-in tariff or payment.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Capital Value</strong></td>
+                            <td>The remaining value of your solar panel system over time, assuming straight-line depreciation over 25 years.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Alternative Investment Value</strong></td>
+                            <td>The amount your installation money could have grown to if invested elsewhere (e.g., mortgage or pension) at the given interest rate.</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Net Position</strong></td>
+                            <td>Your overall financial outcome: Your combined solar savings, plus your cumulatitive export revenue, plus the remaining capital value of your system minus the alternative investment value.</td>
+                        </tr>
                     </tbody>
                   </table>
                 </div>
@@ -126,6 +118,11 @@
                 <div class="card-header mb-0">
                     
                     <h3 class="">Solar Energy Financial Projection: </h3>
+                    {% if net_position[0] != "-" %}
+                        <p>Investing your capital in solar panels rather than an alternative investment strategy, after 25 years, would be beneficial by €{{ net_position }}. See table below.</p>
+                    {% else %}
+                        <p>The figures suggest that investing your capital in solar panels rather than an alternative investment strategy, after 25 years, would not be beneficial by €{{ net_position[1:] }}. See table below.</p>
+                    {% endif %}
                 </div>
                 <div class="card-body">
                     {{ table | safe }}
